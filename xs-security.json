@@ -1,0 +1,55 @@
+{
+  "xsappname": "zcapex-${org}-${space}",
+  "description": "XSUAA Security profile of Kruger Capital Expenditure Approval Process",
+  "tenant-mode": "dedicated",
+  "scopes": [
+    {
+      "name": "$XSAPPNAME.ZCapexApprover",
+      "description": "Approve Kruger Capital Expenditure Approval Process"
+    },
+    {
+      "name": "$XSAPPNAME.ZCapexUser",
+      "description": "Use Kruger Capital Expenditure Approval Process"
+    },
+    {
+      "name": "$XSAPPNAME.ZCapexAdmin",
+      "description": "Administer Kruger Capital Expenditure Approval Process"
+    }
+  ],
+  "attributes": [],
+  "role-templates": [
+    {
+      "name": "ZCapexApprover",
+      "description": "Approve Kruger Capital Expenditure Approval Process",
+      "scope-references": [
+        "$XSAPPNAME.ZCapexApprover"
+      ],
+      "attribute-references": []
+    },
+    {
+      "name": "ZCapexUser",
+      "description": "Use Kruger Capital Expenditure Approval Process",
+      "scope-references": [
+        "$XSAPPNAME.ZCapexUser"
+      ],
+      "attribute-references": []
+    },
+    {
+      "name": "ZCapexAdmin",
+      "description": "Administer Kruger Capital Expenditure Approval Process",
+      "scope-references": [
+        "$XSAPPNAME.ZCapexAdmin"
+      ],
+      "attribute-references": []
+    }
+  ],
+  "oauth2-configuration": {
+    "redirect-uris": [
+      "https://*cfapps.us10-001.hana.ondemand.com/login/callback/**",
+      "http://localhost:5000/login/callback/**",
+      "http://*.localhost:4004/**",
+      "https://*.applicationstudio.cloud.sap/**"
+    ]
+  },
+  "authorities-inheritance": false
+}

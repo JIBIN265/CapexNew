@@ -1,0 +1,225 @@
+_schema-version: 3.3.0
+ID: zcapex
+description: Kruger Capital Expenditure Approval Process
+version: 1.0.0
+modules:
+- name: zcapex-srv
+  type: nodejs
+  path: gen/srv
+  requires:
+  - name: zcapex-db
+  - name: zcapex-auth
+  - name: zcapex-logs
+  - name: zcapex-connectivity
+  - name: zcapex-destination-service
+  - name: sbpa_dms_repo
+  provides:
+  - name: srv-api
+    properties:
+      srv-url: ${default-url}
+  parameters:
+    buildpack: nodejs_buildpack
+    readiness-health-check-http-endpoint: /health
+    readiness-health-check-type: http
+  build-parameters:
+    builder: npm
+- name: zcapex-db-deployer
+  type: hdb
+  path: gen/db
+  requires:
+  - name: zcapex-db
+  - name: zcapex-logs
+  parameters:
+    buildpack: nodejs_buildpack
+- name: zcapex-destination-content
+  type: com.sap.application.content
+  requires:
+  - name: zcapex-destination-service
+    parameters:
+      content-target: true
+  - name: zcapex-repo-host
+    parameters:
+      service-key:
+        name: zcapex-repo-host-key
+  - name: zcapex-auth
+    parameters:
+      service-key:
+        name: uaa_capex-key
+  parameters:
+    content:
+      instance:
+        destinations:
+        - Name: hana_app_zcapex_repo_host
+          ServiceInstanceName: zcapex-html5-srv
+          ServiceKeyName: zcapex-repo-host-key
+          sap.cloud.service: hana.app
+        - Authentication: OAuth2UserTokenExchange
+          Name: hana_app_uaa_zcapex
+          ServiceInstanceName: zcapex-xsuaa-service
+          ServiceKeyName: uaa_zcapex-key
+          sap.cloud.service: hana.app
+        existing_destinations_policy: ignore
+  build-parameters:
+    no-source: true
+- name: zcapex-router
+  type: approuter.nodejs
+  path: app/router
+  requires:
+  - name: srv-api
+    group: destinations
+    properties:
+      forwardAuthToken: true
+      name: srv-api
+      url: ~{srv-url}
+  - name: zcapex-auth
+  - name: zcapex-destination-service
+    group: destinations
+    properties:
+      forwardAuthToken: false
+      name: ui5
+      url: https://ui5.sap.com
+  parameters:
+    disk-quota: 256M
+    keep-existing-routes: true
+    memory: 256M
+  build-parameters:
+    ignore:
+    - .env
+    - node_modules/
+    - default-env.json
+- name: zcapex-app-content
+  type: com.sap.application.content
+  path: .
+  requires:
+  - name: zcapex-repo-host
+    parameters:
+      content-target: true
+  build-parameters:
+    build-result: resources
+    requires:
+    - artifacts:
+      - zsustainabilitydefaults.zip
+      name: zsustainabilitydefaults
+      target-path: resources/
+    - artifacts:
+      - zstatusvalues.zip
+      name: zstatusvalues
+      target-path: resources/
+    - artifacts:
+      - zcapexmain.zip
+      name: zcapexmain
+      target-path: resources/
+- name: zsustainabilitydefaults
+  type: html5
+  path: app/zsustainabilitydefaults
+  build-parameters:
+    build-result: dist
+    builder: custom
+    commands:
+    - npm install
+    - npm run build:cf
+    supported-platforms: []
+- name: zstatusvalues
+  type: html5
+  path: app/zstatusvalues
+  build-parameters:
+    build-result: dist
+    builder: custom
+    commands:
+    - npm install
+    - npm run build:cf
+    supported-platforms: []
+- name: zcapexmain
+  type: html5
+  path: app/zcapexmain
+  build-parameters:
+    build-result: dist
+    builder: custom
+    commands:
+    - npm install
+    - npm run build:cf
+    supported-platforms: []
+resources:
+- name: sbpa_dms_repo
+  type: org.cloudfoundry.existing-service
+- name: zcapex-db
+  type: com.sap.xs.hdi-container
+  parameters:
+    service: hana
+    service-plan: hdi-shared
+- name: zcapex-auth
+  type: org.cloudfoundry.managed-service
+  parameters:
+    config:
+      role-collections:
+      - description: Approve Kruger Capital Expenditure Approval Process
+        name: ZCapexApprover-${space}
+        role-template-references:
+        - $XSAPPNAME.ZCapexApprover
+      - description: Use Kruger Capital Expenditure Approval Process
+        name: ZCapexUser-${space}
+        role-template-references:
+        - $XSAPPNAME.ZCapexUser
+      - description: Administer Kruger Capital Expenditure Approval Process
+        name: ZCapexAdmin-${space}
+        role-template-references:
+        - $XSAPPNAME.ZCapexAdmin
+      tenant-mode: dedicated
+      xsappname: zcapex-${org}-${space}
+    path: ./xs-security.json
+    service: xsuaa
+    service-name: zcapex-xsuaa-service
+    service-plan: application
+- name: zcapex-destination-service
+  type: org.cloudfoundry.managed-service
+  parameters:
+    config:
+      HTML5Runtime_enabled: true
+      init_data:
+        instance:
+          destinations:
+          - Authentication: NoAuthentication
+            HTML5.DynamicDestination: true
+            HTML5.ForwardAuthToken: true
+            Name: zcapex-srv
+            ProxyType: Internet
+            Type: HTTP
+            URL: ~{srv-api/srv-url}
+          - Authentication: NoAuthentication
+            Name: ui5
+            ProxyType: Internet
+            Type: HTTP
+            URL: https://ui5.sap.com
+          existing_destinations_policy: update
+      version: 1.0.0
+    service: destination
+    service-name: zcapex-destination-service
+    service-plan: lite
+  requires:
+  - name: srv-api
+- name: zcapex-repo-host
+  type: org.cloudfoundry.managed-service
+  parameters:
+    service: html5-apps-repo
+    service-name: zcapex-html5-srv
+    service-plan: app-host
+- name: zcapex-logs
+  type: org.cloudfoundry.managed-service
+  parameters:
+    service: application-logs
+    service-plan: lite
+- name: zcapex-connectivity
+  type: org.cloudfoundry.managed-service
+  parameters:
+    service: connectivity
+    service-plan: lite
+parameters:
+  deploy_mode: html5-repo
+  enable-parallel-deployments: true
+build-parameters:
+  before-all:
+  - builder: custom
+    commands:
+    - npm ci
+    - npx cds build --production
+    - npx rimraf gen/db/src/gen/data
