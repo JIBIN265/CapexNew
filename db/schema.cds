@@ -13,7 +13,7 @@ using {
   sap.common.Region,
   sap.common.UnitOfMeasure,
   sap.common.Criticality
-} from '../db/common.cds';
+} from './common';
 using {Attachments} from '@cap-js/sdm';
 
 type messageImport {
@@ -191,9 +191,6 @@ aspect CapexMain {
   @description: 'Targeted Approval Date'
   targetDate           : Date;
 
-  @description: 'Current Approver'
-  currentApprover      : User;
-
   @description: 'Status Value Association'
   to_Status            : Association to one StatusValues
                            on to_Status.code = status;
@@ -211,6 +208,10 @@ entity StatusValues : cuid, managed, {
 entity CapexEntity : cuid, managed, CapexMain, DocumentId, messageImport {
   approvedCount       : Integer @Core.Computed;
   totalApprovals      : Integer @Core.Computed;
+
+  @description: 'Current Approver'
+  currentApprover     : User;
+
   // createEnabled       : Boolean default true; //In true action disables
   // approveEnabled      : Boolean default false;
 
@@ -319,8 +320,11 @@ aspect ApproverHistory : cuid, managed {
   @description: 'Number of Days'
   days         : String(10);
 
-  @comments   : 'Comments'
-  comments     : String(1000);
+  // @comments   : 'Comments'
+  // comments     : String(1000);
+
+  @comments   : 'ECC Status'
+  estat        : String(10);
 
   @comments   : 'Pending Date'
   pendingDate  : Date;

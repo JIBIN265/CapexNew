@@ -51,7 +51,9 @@
     "build": "rimraf resources mta_archives && mbt build --mtar archive",
     "deploy": "cf deploy mta_archives/archive.mtar --retries 1",
     "clean": "rimraf \"**/*mta_archives\" \"**/*gen\" \"**/*resources\" \"**/*dist\" \"**/*node_modules\" \"**/*package-lock.json\"",
-    "all": "npm run clean && npm run cds && npm run build && npm run deploy"
+    "all": "npm run clean && npm run cds && npm run build && npm run deploy",
+    "hybrid": "cds watch --profile hybrid",
+    "kill": "lsof -i :4004 | grep LISTEN | awk '{print $2}' | xargs kill -9 || echo 'No process running on port 4004'"
   },
   "cds": {
     "fiori": {

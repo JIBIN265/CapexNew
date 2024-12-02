@@ -1,6 +1,7 @@
 const cds = require("@sap/cds");
 const { SELECT, INSERT, UPDATE } = cds.ql;
 const SequenceHelper = require("./lib/SequenceHelper");
+const uuid = require('uuid');
 
 class CapexCatalogService extends cds.ApplicationService {
     async init() {
@@ -8,6 +9,7 @@ class CapexCatalogService extends cds.ApplicationService {
             Capex,
             CashFlowYear,
             ApproverHistory,
+            Comments,
             Sustainability2030,
             Cot001Set,
             OrderTypeF4Set,
@@ -108,7 +110,7 @@ class CapexCatalogService extends cds.ApplicationService {
                 // let createValue;
                 // let approveValue;
                 // try {
-                    // Fetch only matching approvers
+                // Fetch only matching approvers
                 //     userRoles = await ecc.tx(req).run(
                 //         SELECT.from('UserRolesSet').where({
                 //             Email: 'JIBIN.THOMAS@KRUGER.COM'.toString()
@@ -130,6 +132,7 @@ class CapexCatalogService extends cds.ApplicationService {
 
                 // req.query.where({ createdBy: req.user.id });
 
+                let currentApprover;
                 const allRecords = await db.run(
                     SELECT.from(Capex)
                         .columns(cpx => {
@@ -158,8 +161,10 @@ class CapexCatalogService extends cds.ApplicationService {
                             const today = new Date();
                             const diffTime = today - pendingDate;
                             history.days = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); // Calculate days difference
+                            currentApprover = 'jibin.thomas@msitek.us';//history.email;
                         } else {
                             history.days = null; // Clear days if not pending
+                            currentApprover = null;
                         }
                     }
                 }
@@ -172,7 +177,8 @@ class CapexCatalogService extends cds.ApplicationService {
                             UPDATE(Capex)
                                 .set({
                                     totalApprovals: capex.totalApprovals,
-                                    approvedCount: capex.approvedCount
+                                    approvedCount: capex.approvedCount,
+                                    currentApprover: currentApprover,
                                     // createEnabled: createValue,
                                     // approveEnabled: approveValue
                                 })
@@ -289,48 +295,48 @@ class CapexCatalogService extends cds.ApplicationService {
 
         });
 
-        this.on('getStatusCount', async (req) => {
-            try {
-                const statusKeys = ['N', 'X', 'E0011', 'D', 'E0010', 'E0009']; // Example status keys
-                const statusCount = await getStatusCounts(statusKeys);
+        // this.on('getStatusCount', async (req) => {
+        //     try {
+        //         const statusKeys = ['N', 'X', 'E0011', 'D', 'E0010', 'E0009']; // Example status keys
+        //         const statusCount = await getStatusCounts(statusKeys);
 
-                return statusCount;
-            } catch (error) {
-                // Handle errors gracefully
-                console.error('Error in getErrorCount:', error.message);
-                // throw new Error('Failed to retrieve error count.');
-            }
-        });
+        //         return statusCount;
+        //     } catch (error) {
+        //         // Handle errors gracefully
+        //         console.error('Error in getErrorCount:', error.message);
+        //         // throw new Error('Failed to retrieve error count.');
+        //     }
+        // });
 
 
-        async function getStatusCounts(keys) {
-            const keyMappings = {
-                'N': 'inProgressCount',
-                'X': 'Count',
-                'E0011': 'rejectIncompleteCount',
-                'D': 'draftCount',
-                'E0010': 'rejectFinalCount',
-                'E0009': 'approvedCount'
-            };
+        // async function getStatusCounts(keys) {
+        //     const keyMappings = {
+        //         'N': 'inProgressCount',
+        //         'X': 'Count',
+        //         'E0011': 'rejectIncompleteCount',
+        //         'D': 'draftCount',
+        //         'E0010': 'rejectFinalCount',
+        //         'E0009': 'approvedCount'
+        //     };
 
-            const statusCount = {};
+        //     const statusCount = {};
 
-            const conditions = keys.map(key => `status = '${key}'`).join(' OR ');
-            const query = SELECT
-                .from(Capex)
-                .columns(['status', 'COUNT(*) AS count'])
-                .where(conditions)
-                .groupBy('status');
+        //     const conditions = keys.map(key => `status = '${key}'`).join(' OR ');
+        //     const query = SELECT
+        //         .from(Capex)
+        //         .columns(['status', 'COUNT(*) AS count'])
+        //         .where(conditions)
+        //         .groupBy('status');
 
-            const results = await db.run(query);
+        //     const results = await db.run(query);
 
-            results.forEach(result => {
-                const mappedKey = keyMappings[result.status];
-                statusCount[mappedKey] = result.count;
-            });
+        //     results.forEach(result => {
+        //         const mappedKey = keyMappings[result.status];
+        //         statusCount[mappedKey] = result.count;
+        //     });
 
-            return statusCount;
-        }
+        //     return statusCount;
+        // }
 
 
 
@@ -425,7 +431,8 @@ class CapexCatalogService extends cds.ApplicationService {
             } = req.data;
 
             if (totalCost !== amount) {
-                req.error(400, `TOTALCOST`, `in/amount`, amount);
+                // req.error(400, `TOTALCOST`, `in/amount`, amount);
+                req.error(400, `Appropriation costs should match the total amount `, `in/amount`);
             }
 
             const record = await db.run(SELECT.one.from(Capex).where({ ID: ID }));
@@ -439,8 +446,7 @@ class CapexCatalogService extends cds.ApplicationService {
                 'currency_code', 'to_CashFlowYear', 'to_Objectives', 'attachments', 'to_RejectionReasons',
                 'ID', 'status', 'documentID', 'notes', 'numericSeverity', 'to_Comments', 'downtime', 'appropriationLife',
                 'targetDate', 'integerValue', 'forecastValue', 'targetValue', 'dimensions', 'fieldWithPrice',
-                'starsValue', 'fieldWithUoM', 'to_ApproverHistory', 'to_Notes', 'approvedCount', 'totalApprovals',
-                'createEnabled', 'approveEnabled', 'currentApprover'
+                'starsValue', 'fieldWithUoM', 'to_ApproverHistory', 'to_Notes', 'approvedCount', 'totalApprovals', 'currentApprover'
             ];
             fieldsToDelete.forEach(field => delete data[field]);
 
@@ -500,6 +506,7 @@ class CapexCatalogService extends cds.ApplicationService {
             await statusChange(req, req.data.ID, newStatus);
 
             let approverlist;
+            let currentApprover;
             try {
                 // Fetch only matching approvers
                 approverlist = await ecc.tx(req).run(
@@ -518,12 +525,7 @@ class CapexCatalogService extends cds.ApplicationService {
 
             if (!approverlist || approverlist.length === 0) {
                 req.error(400, "Approver list is empty");
-                // req.error(400, "Approver list is empty");
-                // req.error(400, "Approver list is empty");
                 if (req.errors) { req.reject(); }
-                // throw cds.error("Approver list is either undefined or empty.", {
-                //     code: 400
-                // });
             } else {
                 // Sort approverlist by Level in ascending order
                 const sortedApprovers = approverlist.sort((a, b) => a.Level - b.Level);
@@ -536,12 +538,19 @@ class CapexCatalogService extends cds.ApplicationService {
                     status: index === 0 ? 'Pending' : 'Not initiated',
                     days: index === 0 ? '1' : null,
                     pendingDate: index === 0 ? new Date().toISOString() : null,
-                    approverName: approver.Name
+                    approverName: approver.Name,
+                    estat: approver.Estat
                 }));
 
                 // Explicitly update the entity if needed
                 const updateHistory = await UPDATE(Capex) // Replace entityName with your actual entity name
                     .set({ to_ApproverHistory: req.data.to_ApproverHistory })
+                    .where({ ID: req.data.ID });
+
+
+                currentApprover = 'jibin.thomas@msitek.us';  ///sortedApprovers[0]?.Email
+                const updateMain = await UPDATE(Capex)
+                    .set({ currentApprover: currentApprover })
                     .where({ ID: req.data.ID });
 
                 const currentAppHis = await db.run(
@@ -744,7 +753,7 @@ class CapexCatalogService extends cds.ApplicationService {
             }
         }
 
-        async function approveChange(req, Status) {
+        async function approveChange(req, Status, wfComments) {
             const wf_parentId = req.params[0].ID;
             //const wf_childId = req.data.childId;
             const wf_status = Status;
@@ -755,11 +764,26 @@ class CapexCatalogService extends cds.ApplicationService {
                         .columns(cpx => {
                             cpx`*`,
                                 cpx.to_ApproverHistory(cfy => { cfy`*` }),
-                                cpx.attachments(atch => { atch`*` })
+                                cpx.attachments(atch => { atch`*` }),
+                                cpx.to_Comments(cmt => { cmt`*` })
                         })
                         .where({ ID: wf_parentId })
                 );
                 let wf_instanceID;
+                if (Comments) {
+                    const newComment = {
+                        up__ID: wf_parentId,
+                        text: wfComments
+                    };
+                    try {
+                        const insertedComment = await db.run(
+                            INSERT.into(Comments).entries(newComment)
+                        );
+                    } catch (error) {
+                        console.error("Error deleting workflow instance:", error);
+                    }
+
+                }
                 const wf_childId = currentRecord[0]?.to_ApproverHistory?.find(record => record.status === 'Pending')?.ID;
                 wf_instanceID = currentRecord[0]?.to_ApproverHistory?.find(record => record.status === 'Pending')?.instanceId;
                 if (wf_status === 'Approved' || wf_status === 'Skipped') {
@@ -777,6 +801,7 @@ class CapexCatalogService extends cds.ApplicationService {
                     let lowestFolderID;
                     let dynamicURL;
                     let lowestName;
+                    let lowestApprover;
 
 
                     let filteredApproverHistory = (currentRecord[0] && currentRecord[0].to_ApproverHistory)
@@ -789,8 +814,7 @@ class CapexCatalogService extends cds.ApplicationService {
 
                     if (filteredApproverHistory.length > 0) {
                         const sortedApprovers = filteredApproverHistory.sort((a, b) => a.Level - b.Level);
-                        lowestLevelEmail = 'jibin.thomas@msitek.us';
-                        lowestLevelID = sortedApprovers[0]?.ID;
+                        lowestLevelEmail = 'jibin.thomas@msitek.us';//currentRecord[0]?.attachments?.[0]?.email  
                         lowestFolderID = currentRecord[0]?.attachments?.[0]?.folderId || null;
                         const baseURL = "https://yk2lt6xsylvfx4dz.launchpad.cfapps.us10.hana.ondemand.com/site/Kruger#Zcapex-manage?sap-ui-app-id-hint=saas_approuter_capex&/Capex({documentID})?layout=TwoColumnsMidExpanded";
                         dynamicURL = baseURL.replace("{documentID}", currentRecord[0]?.documentID);
@@ -801,7 +825,6 @@ class CapexCatalogService extends cds.ApplicationService {
                             wf_instanceID = sortedApprovers[0].instanceId;
                         }
 
-
                         const updatedApproverHistory1 = await db.run(
                             UPDATE(ApproverHistory)
                                 .set({
@@ -811,6 +834,10 @@ class CapexCatalogService extends cds.ApplicationService {
                                 })
                                 .where({ up__ID: wf_parentId, ID: lowestLevelID })
                         );
+                        if (wf_status === 'Approved') {
+                            const newStatus = currentRecord[0].to_ApproverHistory[0].estat;//"E0010";
+                            await statusChange(req, wf_parentId, newStatus);
+                        }
 
                     } else {
                         return {
@@ -895,10 +922,27 @@ class CapexCatalogService extends cds.ApplicationService {
                             })
                             .where({ up__ID: wf_parentId, ID: wf_childId })
                     );
+
+                    let deletePayload = [
+                        {
+                            id: wf_instanceID, // ID of the workflow instance to delete
+                            deleted: true           // Mark it for deletion
+                        }
+                    ];
+
+                    try {
+                        // Send the PATCH request
+                        let deleteResponse = await BPA_WORKFLOW.send('PATCH', '/', deletePayload);
+
+                        console.log("Workflow instance deleted successfully:", deleteResponse);
+                    } catch (error) {
+                        console.error("Error deleting workflow instance:", error);
+                    }
+
                     const newStatus = "E0010";
                     await statusChange(req, wf_parentId, newStatus);
                     return {
-                        response: 'Workflow Triggered Ended'
+                        response: 'Workflow Triggered Rejected'
                     };
                 }
 
@@ -911,21 +955,23 @@ class CapexCatalogService extends cds.ApplicationService {
 
         this.on("validate", async req => {
             const Status = 'Skipped';
-            await approveChange(req, Status);
+            const Comments = req.data.text
+            await approveChange(req, Status, Comments);
         });
 
         this.on("rejectFinal2", async req => {
             const Status = 'Rejected';
-            const Comments = req.data.text
-            await approveChange(req, Status);
+            const Comments = req.data.text;
+            await approveChange(req, Status, Comments);
         });
 
         this.on("rejectIncomplete", async (req) => {
             // const { ID } = req.params[0];
             // const newStatus = "E0011";
             // await statusChange(req, ID, newStatus);
+            const Comments = req.data.text
             const Status = 'Rework';
-            await approveChange(req, Status);
+            await approveChange(req, Status, Comments);
         });
 
         this.on("approve", async (req) => {
@@ -947,10 +993,22 @@ class CapexCatalogService extends cds.ApplicationService {
                         UPDATE(ApproverHistory)
                             .set({
                                 status: wf_status,
-                                comments: wf_comments
+                                // comments: wf_comments
                             })
                             .where({ up__ID: wf_parentId, ID: wf_childId })
                     );
+
+                    if (wf_comments) {
+                        const newComment = {
+                            up__ID: wf_parentId,
+                            text: wf_comments
+                        };
+
+                        const insertedComment = await db.run(
+                            INSERT.into(Comments).entries(newComment)
+                        );
+                    }
+
 
                     const currentRecord = await db.run(
                         SELECT.from(Capex)
@@ -988,6 +1046,17 @@ class CapexCatalogService extends cds.ApplicationService {
                         } else if (wf_status === 'Skipped') {
                             lowestName = sortedApprovers[0].approverName;
                         }
+
+                        const lowestApprover = 'jibin.thomas@msitek.us';//currentRecord[0]?.attachments?.[0]?.email
+                        const updateMain = await UPDATE(Capex)
+                            .set({ currentApprover: lowestApprover })
+                            .where({ ID: wf_parentId });
+
+                        if (wf_status === 'Approved') {
+                            const newStatus = currentRecord[0].to_ApproverHistory[0].estat;//"E0010";
+                            await statusChange(req, wf_parentId, newStatus);
+                        }
+
 
                         const updatedApproverHistory1 = await db.run(
                             UPDATE(ApproverHistory)
@@ -1068,7 +1137,7 @@ class CapexCatalogService extends cds.ApplicationService {
                     const newStatus = "E0010";
                     await statusChange(req, wf_parentId, newStatus);
                     return {
-                        response: 'Workflow Triggered Ended'
+                        response: 'Workflow Triggered Rejected'
                     };
                 }
 

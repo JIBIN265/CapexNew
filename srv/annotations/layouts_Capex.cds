@@ -1,4 +1,4 @@
-using CapexCatalogService as service from '../../srv/cat-service';
+using CapexCatalogService as service from '../cat-service';
 using CapexCatalogService.CashFlowYear as CashFlowYear from './layouts_to_CashFlowYear';
 using CapexCatalogService.Comments as Comments from './layouts_to_Comments';
 using CapexCatalogService.Notes as Notes from './layouts_to_Notes';

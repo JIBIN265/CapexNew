@@ -4,23 +4,34 @@
   "tenant-mode": "dedicated",
   "scopes": [
     {
+      "name": "uaa.user",
+      "description": "UAA"
+     },
+    {
       "name": "$XSAPPNAME.ZCapexApprover",
-      "description": "Approve Kruger Capital Expenditure Approval Process"
+      "description": "Approver Kruger Capital Expenditure Approval Process"
     },
     {
       "name": "$XSAPPNAME.ZCapexUser",
-      "description": "Use Kruger Capital Expenditure Approval Process"
+      "description": "User Kruger Capital Expenditure Approval Process"
     },
     {
       "name": "$XSAPPNAME.ZCapexAdmin",
-      "description": "Administer Kruger Capital Expenditure Approval Process"
+      "description": "Administrator Kruger Capital Expenditure Approval Process"
     }
   ],
   "attributes": [],
   "role-templates": [
     {
+      "name": "Token_Exchange",
+      "description": "UAA",
+      "scope-references": [
+       "uaa.user"
+      ]
+     },
+    {
       "name": "ZCapexApprover",
-      "description": "Approve Kruger Capital Expenditure Approval Process",
+      "description": "Approver Kruger Capital Expenditure Approval Process",
       "scope-references": [
         "$XSAPPNAME.ZCapexApprover"
       ],
@@ -36,7 +47,7 @@
     },
     {
       "name": "ZCapexAdmin",
-      "description": "Administer Kruger Capital Expenditure Approval Process",
+      "description": "Administrator Kruger Capital Expenditure Approval Process",
       "scope-references": [
         "$XSAPPNAME.ZCapexAdmin"
       ],

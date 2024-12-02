@@ -1,4 +1,4 @@
-using CapexCatalogService as service from '../../srv/cat-service';
+using CapexCatalogService as service from '../cat-service';
 
 // annotate service.Capex.approve with @(Common.IsActionCritical: true);
 //

@@ -336,7 +336,8 @@
                     }
                   }
                 }
-              }
+              },
+              "initialLoad": "Enabled"
             }
           },
           "controlAggregation": "beginColumnPages",
@@ -506,8 +507,7 @@
           "options": {
             "settings": {
               "viewName": "zcapexmain.ext.view.ViewPdfPage",
-              "contextPath": "/Capex/attachments",
-              "enhanceI18n": "i18n/customI18N.properties"
+              "contextPath": "/Capex/attachments"
             }
           },
           "contextPattern": "/Capex({key})/attachments({attachmentsKey})"

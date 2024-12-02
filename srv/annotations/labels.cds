@@ -1,4 +1,4 @@
-using CapexCatalogService as service from '../../srv/cat-service';
+using CapexCatalogService as service from '../cat-service';
 
 //
 // annotations that control rendering of fields and labels
@@ -18,6 +18,7 @@ annotate service.Capex with {
     businessReason        @title: '{i18n>businessReason}'        @UI.Placeholder: '{i18n>placeHolderBusinessReason}';
     amount                @title: '{i18n>amount}'                @UI.Placeholder: '{i18n>placeHolderAmount}';
     currency              @title: '{i18n>currency}';
+    currentApprover       @title: '{i18n>currentApprover}';
     strategic             @title: '{i18n>strategic}'             @UI.Placeholder: '{i18n>placeHolderStrategic}';
     businessSustaining    @title: '{i18n>businessSustaining}'    @UI.Placeholder: '{i18n>placeHolderBusinessSustaining}';
     mandatory             @title: '{i18n>mandatory}'             @UI.Placeholder: '{i18n>placeHolderMandatory}';

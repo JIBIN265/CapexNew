@@ -1,4 +1,4 @@
-using CapexCatalogService as service from '../../srv/cat-service';
+using CapexCatalogService as service from '../cat-service';
 
 annotate service.CashFlowYear with @(UI.LineItem #AnnualCashFlow: [
     {

@@ -1,4 +1,4 @@
-using CapexCatalogService as service from '../../srv/cat-service';
+using CapexCatalogService as service from '../cat-service';
 using from './layouts_Capex';
 
 annotate service.CurrencyF4Set with @(cds.odata.valuelist);

@@ -1,4 +1,4 @@
-using CapexCatalogService as service from '../../srv/cat-service';
+using CapexCatalogService as service from '../cat-service';
 
 annotate service.ApproverHistory with @(
     UI.LineItem #ApproverHistory                    : [
@@ -21,12 +21,7 @@ annotate service.ApproverHistory with @(
             $Type: 'UI.DataField',
             Value: days,
             Label: '{i18n>NumberOfDays}',
-        },
-        {
-            $Type: 'UI.DataField',
-            Value: comments,
-            Label: '{i18n>notes2}',
-        },
+        }
     ],
     UI.SelectionPresentationVariant #ApproverHistory: {
         $Type              : 'UI.SelectionPresentationVariantType',
