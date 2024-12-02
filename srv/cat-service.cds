@@ -82,173 +82,187 @@ service CapexCatalogService @(requires: 'authenticated-user') {
 
         };
 
-    entity Comments @(restrict: [
-        {
-            grant: ['READ'],
-            to   : ['ZCapexApprover'],
-            where: 'currentApprover = $user'
-        },
-        {
-            grant: [
-                'READ',
-                'UPDATE'
-            ],
-            to   : ['ZCapexUser'],
-            where: 'createdBy = $user'
-        },
-        {
-            grant: 'WRITE',
-            to   : ['ZCapexUser']
-        },
-        {
-            grant: ['*'],
-            to   : ['ZCapexAdmin']
-        }
-    ])                           as projection on persistence.CapexEntity.to_Comments;
+    entity Comments 
+    // @(restrict: [
+    //     {
+    //         grant: ['READ'],
+    //         to   : ['ZCapexApprover'],
+    //         where: 'currentApprover = $user'
+    //     },
+    //     {
+    //         grant: [
+    //             'READ',
+    //             'UPDATE'
+    //         ],
+    //         to   : ['ZCapexUser'],
+    //         where: 'createdBy = $user'
+    //     },
+    //     {
+    //         grant: 'WRITE',
+    //         to   : ['ZCapexUser']
+    //     },
+    //     {
+    //         grant: ['*'],
+    //         to   : ['ZCapexAdmin']
+    //     }
+    // ])                           
+    as projection on persistence.CapexEntity.to_Comments;
 
-    entity CashFlowYear @(restrict: [
-        {
-            grant: ['READ'],
-            to   : ['ZCapexApprover'],
-            where: 'currentApprover = $user'
-        },
-        {
-            grant: [
-                'READ',
-                'UPDATE'
-            ],
-            to   : ['ZCapexUser'],
-            where: 'createdBy = $user'
-        },
-        {
-            grant: 'WRITE',
-            to   : ['ZCapexUser']
-        },
-        {
-            grant: ['*'],
-            to   : ['ZCapexAdmin']
-        }
-    ])                           as projection on persistence.CapexEntity.to_CashFlowYear;
+    entity CashFlowYear 
+    // @(restrict: [
+    //     {
+    //         grant: ['READ'],
+    //         to   : ['ZCapexApprover'],
+    //         where: 'currentApprover = $user'
+    //     },
+    //     {
+    //         grant: [
+    //             'READ',
+    //             'UPDATE'
+    //         ],
+    //         to   : ['ZCapexUser'],
+    //         where: 'createdBy = $user'
+    //     },
+    //     {
+    //         grant: 'WRITE',
+    //         to   : ['ZCapexUser']
+    //     },
+    //     {
+    //         grant: ['*'],
+    //         to   : ['ZCapexAdmin']
+    //     }
+    // ])                           
+    as projection on persistence.CapexEntity.to_CashFlowYear;
 
-    entity Objectives @(restrict: [
-        {
-            grant: ['READ'],
-            to   : ['ZCapexApprover'],
-            where: 'currentApprover = $user'
-        },
-        {
-            grant: [
-                'READ',
-                'UPDATE'
-            ],
-            to   : ['ZCapexUser'],
-            where: 'createdBy = $user'
-        },
-        {
-            grant: 'WRITE',
-            to   : ['ZCapexUser']
-        },
-        {
-            grant: ['*'],
-            to   : ['ZCapexAdmin']
-        }
-    ])                           as projection on persistence.CapexEntity.to_Objectives;
+    entity Objectives 
+    // @(restrict: [
+    //     {
+    //         grant: ['READ'],
+    //         to   : ['ZCapexApprover'],
+    //         where: 'currentApprover = $user'
+    //     },
+    //     {
+    //         grant: [
+    //             'READ',
+    //             'UPDATE'
+    //         ],
+    //         to   : ['ZCapexUser'],
+    //         where: 'createdBy = $user'
+    //     },
+    //     {
+    //         grant: 'WRITE',
+    //         to   : ['ZCapexUser']
+    //     },
+    //     {
+    //         grant: ['*'],
+    //         to   : ['ZCapexAdmin']
+    //     }
+    // ])                           
+    as projection on persistence.CapexEntity.to_Objectives;
 
-    entity RejectionReasons @(restrict: [
-        {
-            grant: ['READ'],
-            to   : ['ZCapexApprover'],
-            where: 'currentApprover = $user'
-        },
-        {
-            grant: [
-                'READ',
-                'UPDATE'
-            ],
-            to   : ['ZCapexUser'],
-            where: 'createdBy = $user'
-        },
-        {
-            grant: 'WRITE',
-            to   : ['ZCapexUser']
-        },
-        {
-            grant: ['*'],
-            to   : ['ZCapexAdmin']
-        }
-    ])                           as projection on persistence.CapexEntity.to_RejectionReasons;
+    entity RejectionReasons 
+    // @(restrict: [
+    //     {
+    //         grant: ['READ'],
+    //         to   : ['ZCapexApprover'],
+    //         where: 'currentApprover = $user'
+    //     },
+    //     {
+    //         grant: [
+    //             'READ',
+    //             'UPDATE'
+    //         ],
+    //         to   : ['ZCapexUser'],
+    //         where: 'createdBy = $user'
+    //     },
+    //     {
+    //         grant: 'WRITE',
+    //         to   : ['ZCapexUser']
+    //     },
+    //     {
+    //         grant: ['*'],
+    //         to   : ['ZCapexAdmin']
+    //     }
+    // ])                           
+    as projection on persistence.CapexEntity.to_RejectionReasons;
 
-    entity ApproverHistory @(restrict: [
-        {
-            grant: ['READ'],
-            to   : ['ZCapexApprover'],
-            where: 'currentApprover = $user'
-        },
-        {
-            grant: [
-                'READ',
-                'UPDATE'
-            ],
-            to   : ['ZCapexUser'],
-            where: 'createdBy = $user'
-        },
-        {
-            grant: 'WRITE',
-            to   : ['ZCapexUser']
-        },
-        {
-            grant: ['*'],
-            to   : ['ZCapexAdmin']
-        }
-    ])                           as projection on persistence.CapexEntity.to_ApproverHistory;
+    entity ApproverHistory 
+    // @(restrict: [
+    //     {
+    //         grant: ['READ'],
+    //         to   : ['ZCapexApprover'],
+    //         where: 'currentApprover = $user'
+    //     },
+    //     {
+    //         grant: [
+    //             'READ',
+    //             'UPDATE'
+    //         ],
+    //         to   : ['ZCapexUser'],
+    //         where: 'createdBy = $user'
+    //     },
+    //     {
+    //         grant: 'WRITE',
+    //         to   : ['ZCapexUser']
+    //     },
+    //     {
+    //         grant: ['*'],
+    //         to   : ['ZCapexAdmin']
+    //     }
+    // ])                           
+    as projection on persistence.CapexEntity.to_ApproverHistory;
 
-    entity Notes @(restrict: [
-        {
-            grant: ['READ'],
-            to   : ['ZCapexApprover'],
-            where: 'currentApprover = $user'
-        },
-        {
-            grant: [
-                'READ',
-                'UPDATE'
-            ],
-            to   : ['ZCapexUser'],
-            where: 'createdBy = $user'
-        },
-        {
-            grant: 'WRITE',
-            to   : ['ZCapexUser']
-        },
-        {
-            grant: ['*'],
-            to   : ['ZCapexAdmin']
-        }
-    ])                           as projection on persistence.CapexEntity.to_Notes;
+    entity Notes 
+    // @(restrict: [
+    //     {
+    //         grant: ['READ'],
+    //         to   : ['ZCapexApprover'],
+    //         where: 'currentApprover = $user'
+    //     },
+    //     {
+    //         grant: [
+    //             'READ',
+    //             'UPDATE'
+    //         ],
+    //         to   : ['ZCapexUser'],
+    //         where: 'createdBy = $user'
+    //     },
+    //     {
+    //         grant: 'WRITE',
+    //         to   : ['ZCapexUser']
+    //     },
+    //     {
+    //         grant: ['*'],
+    //         to   : ['ZCapexAdmin']
+    //     }
+    // ])                           
+    as projection on persistence.CapexEntity.to_Notes;
 
-    entity Sustainability2030 @(restrict: [
-        {
-            grant: ['READ'],
-            to   : ['ZCapexApprover'],
-            where: 'currentApprover = $user'
-        },
-        {
-            grant: [
-                'READ',
-                'UPDATE'
-            ],
-            to   : ['ZCapexUser'],
-            where: 'createdBy = $user'
-        },
-        {
-            grant: 'WRITE',
-            to   : ['ZCapexUser']
-        },
-        {
-            grant: ['*'],
-            to   : ['ZCapexAdmin']
-        }
-    ])                           as projection on persistence.Sustainability2030;
+    entity Sustainability2030 
+    // @(restrict: [
+    //     {
+    //         grant: ['READ'],
+    //         to   : ['ZCapexApprover'],
+    //         where: 'currentApprover = $user'
+    //     },
+    //     {
+    //         grant: [
+    //             'READ',
+    //             'UPDATE'
+    //         ],
+    //         to   : ['ZCapexUser'],
+    //         where: 'createdBy = $user'
+    //     },
+    //     {
+    //         grant: 'WRITE',
+    //         to   : ['ZCapexUser']
+    //     },
+    //     {
+    //         grant: ['*'],
+    //         to   : ['ZCapexAdmin']
+    //     }
+    // ])                           
+    as projection on persistence.Sustainability2030;
 
     @readonly
     entity CompanyCode           as projection on persistence.CompanyCode;

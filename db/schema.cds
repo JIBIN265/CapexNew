@@ -211,8 +211,8 @@ entity StatusValues : cuid, managed, {
 entity CapexEntity : cuid, managed, CapexMain, DocumentId, messageImport {
   approvedCount       : Integer @Core.Computed;
   totalApprovals      : Integer @Core.Computed;
-  createEnabled       : Boolean default true; //In true action disables
-  approveEnabled      : Boolean default false;
+  // createEnabled       : Boolean default true; //In true action disables
+  // approveEnabled      : Boolean default false;
 
   @description: 'Cash Flow Year Composition'
   to_CashFlowYear     : Composition of many CashFlowYear;

@@ -104,31 +104,31 @@ class CapexCatalogService extends cds.ApplicationService {
                 // }));
                 // console.log('Synchronization with ECC completed successfully');
 
-                let userRoles;
-                let createValue;
-                let approveValue;
-                try {
+                // let userRoles;
+                // let createValue;
+                // let approveValue;
+                // try {
                     // Fetch only matching approvers
-                    userRoles = await ecc.tx(req).run(
-                        SELECT.from('UserRolesSet').where({
-                            Email: 'JIBIN.THOMAS@KRUGER.COM'.toString()
-                        })
-                    );
+                //     userRoles = await ecc.tx(req).run(
+                //         SELECT.from('UserRolesSet').where({
+                //             Email: 'JIBIN.THOMAS@KRUGER.COM'.toString()
+                //         })
+                //     );
 
-                    if (userRoles[0]?.Create === 'X') {
-                        createValue = true;
-                        approveValue = false;
-                    }
-                    else if (userRoles[0]?.Approve === 'X') {
-                        createValue = false;
-                        approveValue = true;
-                    }
+                //     if (userRoles[0]?.Create === 'X') {
+                //         createValue = true;
+                //         approveValue = false;
+                //     }
+                //     else if (userRoles[0]?.Approve === 'X') {
+                //         createValue = false;
+                //         approveValue = true;
+                //     }
 
-                } catch (error) {
-                    console.error('Error fetching or processing user roles:', error);
-                }
+                // } catch (error) {
+                //     console.error('Error fetching or processing user roles:', error);
+                // }
 
-                req.query.where({ createdBy: req.user.id });
+                // req.query.where({ createdBy: req.user.id });
 
                 const allRecords = await db.run(
                     SELECT.from(Capex)
@@ -172,9 +172,9 @@ class CapexCatalogService extends cds.ApplicationService {
                             UPDATE(Capex)
                                 .set({
                                     totalApprovals: capex.totalApprovals,
-                                    approvedCount: capex.approvedCount,
-                                    createEnabled: createValue,
-                                    approveEnabled: approveValue
+                                    approvedCount: capex.approvedCount
+                                    // createEnabled: createValue,
+                                    // approveEnabled: approveValue
                                 })
                                 .where({ ID: capex.ID })
                         )
@@ -230,7 +230,7 @@ class CapexCatalogService extends cds.ApplicationService {
                 const records = await db.run(SELECT.from(Sustainability2030));
                 req.data.to_Objectives = records;
             }
-
+            // req.error(400, `Please add an attachment`, `in/attachments`);
             req.notify(428, `ATTACHMENT`, 'in/attachments');
         });
 
@@ -425,9 +425,7 @@ class CapexCatalogService extends cds.ApplicationService {
             } = req.data;
 
             if (totalCost !== amount) {
-                // req.error(400, `TOTALCOST`, `in/amount`, amount);
-                req.error(400, `Appropriation costs should match the total amount`, `in/totalCost`);
-                // return req.error(404, `Appropriation costs should match the total amount${amount}`);
+                req.error(400, `TOTALCOST`, `in/amount`, amount);
             }
 
             const record = await db.run(SELECT.one.from(Capex).where({ ID: ID }));
@@ -442,7 +440,7 @@ class CapexCatalogService extends cds.ApplicationService {
                 'ID', 'status', 'documentID', 'notes', 'numericSeverity', 'to_Comments', 'downtime', 'appropriationLife',
                 'targetDate', 'integerValue', 'forecastValue', 'targetValue', 'dimensions', 'fieldWithPrice',
                 'starsValue', 'fieldWithUoM', 'to_ApproverHistory', 'to_Notes', 'approvedCount', 'totalApprovals',
-                'createEnabled', 'approveEnabled'
+                'createEnabled', 'approveEnabled', 'currentApprover'
             ];
             fieldsToDelete.forEach(field => delete data[field]);
 

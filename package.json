@@ -106,9 +106,6 @@
           "path": "/sap/opu/odata/sap/ZODATA_INTERNAL_ORDER_SRV"
         }
       }
-    },
-    "sql": {
-      "native_hana_associations": false
     }
   },
   "sapux": [
