@@ -1,7 +1,7 @@
 _schema-version: 3.3.0
 ID: zcapex
 description: Kruger Capital Expenditure Approval Process
-version: 1.0.6
+version: 1.0.7
 modules:
 - name: zcapex-srv
   type: nodejs
@@ -109,6 +109,14 @@ modules:
       - zcapexmain.zip
       name: zcapexmain
       target-path: resources/
+    - artifacts:
+      - zcapexapprover.zip
+      name: zcapexapprover
+      target-path: resources/
+    - artifacts:
+      - zcapexcreator.zip
+      name: zcapexcreator
+      target-path: resources/
 - name: zsustainabilitydefaults
   type: html5
   path: app/zsustainabilitydefaults
@@ -132,6 +140,26 @@ modules:
 - name: zcapexmain
   type: html5
   path: app/zcapexmain
+  build-parameters:
+    build-result: dist
+    builder: custom
+    commands:
+    - npm install
+    - npm run build:cf
+    supported-platforms: []
+- name: zcapexapprover
+  type: html5
+  path: app/zcapexapprover
+  build-parameters:
+    build-result: dist
+    builder: custom
+    commands:
+    - npm install
+    - npm run build:cf
+    supported-platforms: []
+- name: zcapexcreator
+  type: html5
+  path: app/zcapexcreator
   build-parameters:
     build-result: dist
     builder: custom

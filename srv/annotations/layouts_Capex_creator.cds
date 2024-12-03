@@ -1,9 +1,9 @@
-using CapexCatalogService as service from '../cat-service';
-using CapexCatalogService.CashFlowYear as CashFlowYear from './layouts_to_CashFlowYear';
-using CapexCatalogService.Comments as Comments from './layouts_to_Comments';
-using CapexCatalogService.Notes as Notes from './layouts_to_Notes';
-using CapexCatalogService.Objectives as Objectives from './layouts_to_Objectives';
-using CapexCatalogService.ApproverHistory as ApproverHistory from './layouts_ApproverHistory';
+using CapexCreatorCatalogService as service from '../creator-service';
+using CapexCreatorCatalogService.CashFlowYear as CashFlowYear from './layouts_to_CashFlowYear_creator';
+using CapexCreatorCatalogService.Comments as Comments from './layouts_to_Comments_creator';
+using CapexCreatorCatalogService.Notes as Notes from './layouts_to_Notes_creator';
+using CapexCreatorCatalogService.Objectives as Objectives from './layouts_to_Objectives_creator';
+using CapexCreatorCatalogService.ApproverHistory as ApproverHistory from './layouts_ApproverHistory_creator';
 using from '../../db/schema';
 
 annotate service.Capex with @(
@@ -97,30 +97,8 @@ annotate service.Capex with @(
     UI.Identification : [
         {
             $Type : 'UI.DataFieldForAction',
-            Action: 'CapexCatalogService.validate',
-            Label : '{i18n>SkipApproval}',
-            Inline: true,
-        },
-        {
-            $Type : 'UI.DataFieldForAction',
-            Action: 'CapexCatalogService.copyCapex',
+            Action: 'CapexCreatorCatalogService.copyCapex',
             Label : '{i18n>Copy}',
-        // ![@UI.IsCopyAction] : true,
-        },
-        {
-            $Type : 'UI.DataFieldForAction',
-            Action: 'CapexCatalogService.approve',
-            Label : '{i18n>Approve}',
-        },
-        {
-            $Type : 'UI.DataFieldForAction',
-            Action: 'CapexCatalogService.rejectIncomplete',
-            Label : 'Send for Rework',
-        },
-        {
-            $Type : 'UI.DataFieldForAction',
-            Action: 'CapexCatalogService.rejectFinal2',
-            Label : '{i18n>RejectOrder}',
         },
     ],
     UI.LineItem       : {
@@ -160,30 +138,9 @@ annotate service.Capex with @(
                 Value: division,
             },
             {
-                $Type : 'UI.DataFieldForAction',
-                Action: 'CapexCatalogService.approve',
-                Label : '{i18n>Approve}',
-            },
-            {
-                $Type : 'UI.DataFieldForAction',
-                Action: 'CapexCatalogService.rejectIncomplete',
-                Label : 'Send for Rework',
-            },
-            {
-                $Type : 'UI.DataFieldForAction',
-                Action: 'CapexCatalogService.rejectFinal2',
-                Label : '{i18n>RejectOrder}',
-            },
-            {
-                $Type : 'UI.DataFieldForAction',
-                Action: 'CapexCatalogService.validate',
-                Label : '{i18n>SkipApproval}',
-            },
-            {
                 $Type              : 'UI.DataFieldForAction',
-                Action             : 'CapexCatalogService.copyCapex',
+                Action             : 'CapexCreatorCatalogService.copyCapex',
                 Label              : '{i18n>Copy}',
-                // ![@UI.IsCopyAction]: true,
             },
             {
                 $Type: 'UI.DataField',

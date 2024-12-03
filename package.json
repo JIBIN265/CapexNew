@@ -113,6 +113,9 @@
   "sapux": [
     "app/zsustainabilitydefaults",
     "app/zstatusvalues",
-    "app/zcapexmain"
+    "app/zcapexmain",
+    "app/zcapexapprover",
+    "app/zcapexapprover",
+    "app/zcapexcreator"
   ]
 }

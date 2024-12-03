@@ -1,13 +1,13 @@
 sap.ui.define(['sap/ui/core/mvc/ControllerExtension'], function (ControllerExtension) {
 	'use strict';
 
-	return ControllerExtension.extend('zcapexmain.ext.controller.CapexObjectPageCustom', {
+	return ControllerExtension.extend('zcapexapprover.ext.controller.CapexObjectPageCustom', {
 		// this section allows to extend lifecycle hooks or hooks provided by Fiori elements
 		override: {
 			/**
 			 * Called when a controller is instantiated and its View controls (if available) are already created.
 			 * Can be used to modify the View before it is displayed, to bind event handlers and do other one-time initialization.
-			 * @memberOf zcapexmain.ext.controller.CapexObjectPageCustom
+			 * @memberOf zcapexapprover.ext.controller.CapexObjectPageCustom
 			 */
 			onInit: function () {
 				// you can access the Fiori elements extensionAPI via this.base.getExtensionAPI
@@ -45,7 +45,7 @@ sap.ui.define(['sap/ui/core/mvc/ControllerExtension'], function (ControllerExten
 						// 	persistent: false,  // Set to 'true' if the message should persist (i.e., not auto-dismiss)
 						// 	type: sap.ui.core.MessageType.Information  // Message type (could be 'Error', 'Success', etc.)
 						// };
-						// const oAttachmentTable = oExtensionAPI.byId('zcapexmain::CapexObjectPage--fe::table::attachments::LineItem::Table')
+						// const oAttachmentTable = oExtensionAPI.byId('zcapexapprover::CapexObjectPage--fe::table::attachments::LineItem::Table')
 						// // if (oAttachmentTable) {// Define message parameters
 
 
@@ -74,7 +74,7 @@ sap.ui.define(['sap/ui/core/mvc/ControllerExtension'], function (ControllerExten
 						// 		// }
 						// 	}, this); // `this` ensures proper context binding
 						// }
-						// const oFeedListItemTemplate = oExtensionAPI.byId('zcapexmain::CapexObjectPage--fe::CustomSubSection::Feed--feedListItemTemplate')
+						// const oFeedListItemTemplate = oExtensionAPI.byId('zcapexapprover::CapexObjectPage--fe::CustomSubSection::Feed--feedListItemTemplate')
 						// if (oList) {
 						// 	// Bind the list to /Capex/to_Comments
 						// 	const sPath = `${oBindingContext.getPath()}/to_Comments`;
@@ -121,7 +121,7 @@ sap.ui.define(['sap/ui/core/mvc/ControllerExtension'], function (ControllerExten
 			// onBeforeNavigate: function () {
 			// 	debugger;
 			// 	const oExtensionAPI = this.base.getExtensionAPI();
-			// 	const oList = oExtensionAPI.byId('zcapexmain::CapexObjectPage--fe::CustomSubSection::Feed--commentsList');
+			// 	const oList = oExtensionAPI.byId('zcapexapprover::CapexObjectPage--fe::CustomSubSection::Feed--commentsList');
 			// 	if (oList) {
 			// 		// Clear the list items
 			// 		oList.removeAllItems();

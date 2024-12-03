@@ -5,7 +5,7 @@ const defaults = require("dotenv").config({
     path: "./srv/defaults/sap-defaults.env",
 });
 
-class CapexCatalogService extends cds.ApplicationService {
+class CapexCreatorCatalogService extends cds.ApplicationService {
     async init() {
         const {
             Capex,
@@ -132,7 +132,7 @@ class CapexCatalogService extends cds.ApplicationService {
                 //     console.error('Error fetching or processing user roles:', error);
                 // }
 
-                // req.query.where({ createdBy: req.user.id });
+                req.query.where({ createdBy: req.user.id });
 
                 let currentApprover;
                 const allRecords = await db.run(
@@ -220,7 +220,7 @@ class CapexCatalogService extends cds.ApplicationService {
 
         this.before("NEW", Capex.drafts, async (req) => {
 
-            if (req.target.name !== "CapexCatalogService.Capex.drafts") { return; }
+            if (req.target.name !== "CapexCreatorCatalogService.Capex.drafts") { return; }
             const { ID } = req.data;
             req.data.status = process.env.DRAFTSTATUS;
             if (!req.data.companyCode) { req.data.companyCode = process.env.COMPANYCODE; }
@@ -294,7 +294,7 @@ class CapexCatalogService extends cds.ApplicationService {
             // console.log(req.data)
 
         });
-
+        
         this.on('getMessages', async (req) => {
             const { Key } = req.data
             try {
@@ -970,203 +970,203 @@ class CapexCatalogService extends cds.ApplicationService {
             }
         }
 
-        this.on("validate", async req => {
-            const Status = 'Skipped';
-            const Comments = req.data.text
-            await approveChange(req, Status, Comments);
-        });
+        // this.on("validate", async req => {
+        //     const Status = 'Skipped';
+        //     const Comments = req.data.text
+        //     await approveChange(req, Status, Comments);
+        // });
 
-        this.on("rejectFinal2", async req => {
-            const Status = 'Rejected';
-            const Comments = req.data.text;
-            await approveChange(req, Status, Comments);
-        });
+        // this.on("rejectFinal2", async req => {
+        //     const Status = 'Rejected';
+        //     const Comments = req.data.text;
+        //     await approveChange(req, Status, Comments);
+        // });
 
-        this.on("rejectIncomplete", async (req) => {
-            // const { ID } = req.params[0];
-            // const newStatus = "E0011";
-            // await statusChange(req, ID, newStatus);
-            const Comments = req.data.text
-            const Status = 'Rework';
-            await approveChange(req, Status, Comments);
-        });
+        // this.on("rejectIncomplete", async (req) => {
+        //     // const { ID } = req.params[0];
+        //     // const newStatus = "E0011";
+        //     // await statusChange(req, ID, newStatus);
+        //     const Comments = req.data.text
+        //     const Status = 'Rework';
+        //     await approveChange(req, Status, Comments);
+        // });
 
-        this.on("approve", async (req) => {
-            // const { ID } = req.params[0];
-            const Status = 'Approved';
-            await approveChange(req, Status);
-            // const newStatus = "E0009";
-            // await statusChange(req, ID, newStatus);
-        });
+        // this.on("approve", async (req) => {
+        //     // const { ID } = req.params[0];
+        //     const Status = 'Approved';
+        //     await approveChange(req, Status);
+        //     // const newStatus = "E0009";
+        //     // await statusChange(req, ID, newStatus);
+        // });
 
-        this.on("workflow", async (req) => {
-            const wf_parentId = req.params[0].ID;
-            const wf_childId = req.data.childId;
-            const wf_status = req.data.status;
-            const wf_comments = req.data.comments;
-            try {
-                if (wf_status === 'Approved' || wf_status === 'Skipped') {
-                    const updatedApproverHistory = await db.run(
-                        UPDATE(ApproverHistory)
-                            .set({
-                                status: wf_status,
-                                // comments: wf_comments
-                            })
-                            .where({ up__ID: wf_parentId, ID: wf_childId })
-                    );
+        // this.on("workflow", async (req) => {
+        //     const wf_parentId = req.params[0].ID;
+        //     const wf_childId = req.data.childId;
+        //     const wf_status = req.data.status;
+        //     const wf_comments = req.data.comments;
+        //     try {
+        //         if (wf_status === 'Approved' || wf_status === 'Skipped') {
+        //             const updatedApproverHistory = await db.run(
+        //                 UPDATE(ApproverHistory)
+        //                     .set({
+        //                         status: wf_status,
+        //                         // comments: wf_comments
+        //                     })
+        //                     .where({ up__ID: wf_parentId, ID: wf_childId })
+        //             );
 
-                    if (wf_comments) {
-                        const newComment = {
-                            up__ID: wf_parentId,
-                            text: wf_comments
-                        };
+        //             if (wf_comments) {
+        //                 const newComment = {
+        //                     up__ID: wf_parentId,
+        //                     text: wf_comments
+        //                 };
 
-                        const insertedComment = await db.run(
-                            INSERT.into(Comments).entries(newComment)
-                        );
-                    }
-
-
-                    const currentRecord = await db.run(
-                        SELECT.from(Capex)
-                            .columns(cpx => {
-                                cpx`*`,
-                                    cpx.to_ApproverHistory(cfy => { cfy`*` }),
-                                    cpx.attachments(atch => { atch`*` })
-                            })
-                            .where({ ID: wf_parentId })
-                    );
-
-                    let lowestLevelEmail;
-                    let lowestLevelID;
-                    let lowestFolderID;
-                    let dynamicURL;
-                    let lowestName;
-
-                    let filteredApproverHistory = (currentRecord[0] && currentRecord[0].to_ApproverHistory)
-                        ? currentRecord[0].to_ApproverHistory.filter(history => history.status === 'Not initiated')
-                        : [];
-
-                    if (filteredApproverHistory.length === 0) {
-                        filteredApproverHistory = currentRecord[0].to_ApproverHistory.filter(history => history.status === 'Skipped');
-                    }
-
-                    if (filteredApproverHistory.length > 0) {
-                        const sortedApprovers = filteredApproverHistory.sort((a, b) => a.Level - b.Level);
-                        lowestLevelEmail = 'jibin.thomas@msitek.us';
-                        lowestLevelID = sortedApprovers[0]?.ID;
-                        lowestFolderID = currentRecord[0]?.attachments?.[0]?.folderId || null;
-                        const baseURL = "https://yk2lt6xsylvfx4dz.launchpad.cfapps.us10.hana.ondemand.com/site/Kruger#Zcapex-manage?sap-ui-app-id-hint=saas_approuter_capex&/Capex({documentID})?layout=TwoColumnsMidExpanded";
-                        dynamicURL = baseURL.replace("{documentID}", currentRecord[0]?.documentID);
-                        if (wf_status === 'Approved') {
-                            lowestName = currentRecord[0].to_ApproverHistory[0].approverName;
-                        } else if (wf_status === 'Skipped') {
-                            lowestName = sortedApprovers[0].approverName;
-                        }
-
-                        const lowestApprover = 'jibin.thomas@msitek.us';//currentRecord[0]?.attachments?.[0]?.email
-                        const updateMain = await UPDATE(Capex)
-                            .set({ currentApprover: lowestApprover })
-                            .where({ ID: wf_parentId });
-
-                        if (wf_status === 'Approved') {
-                            const newStatus = currentRecord[0].to_ApproverHistory[0].estat;//"E0010";
-                            await statusChange(req, wf_parentId, newStatus);
-                        }
+        //                 const insertedComment = await db.run(
+        //                     INSERT.into(Comments).entries(newComment)
+        //                 );
+        //             }
 
 
-                        const updatedApproverHistory1 = await db.run(
-                            UPDATE(ApproverHistory)
-                                .set({
-                                    status: 'Pending',
-                                    days: '1',
-                                    pendingDate: new Date().toISOString()
-                                })
-                                .where({ up__ID: wf_parentId, ID: lowestLevelID })
-                        );
+        //             const currentRecord = await db.run(
+        //                 SELECT.from(Capex)
+        //                     .columns(cpx => {
+        //                         cpx`*`,
+        //                             cpx.to_ApproverHistory(cfy => { cfy`*` }),
+        //                             cpx.attachments(atch => { atch`*` })
+        //                     })
+        //                     .where({ ID: wf_parentId })
+        //             );
 
-                    } else {
-                        return {
-                            response: 'Workflow ended'
-                        };
-                    }
+        //             let lowestLevelEmail;
+        //             let lowestLevelID;
+        //             let lowestFolderID;
+        //             let dynamicURL;
+        //             let lowestName;
 
-                    let testData = {
-                        "definitionId": "us10.yk2lt6xsylvfx4dz.zcapexworkflow.triggerWorkflow",
-                        "context": {
-                            "orderNumber": currentRecord[0].orderNumber ? String(currentRecord[0].orderNumber) : "null",
-                            "orderType": currentRecord[0].orderType ? String(currentRecord[0].orderType) : "null",
-                            "companyCode": currentRecord[0].companyCode ? String(currentRecord[0].companyCode) : "null",
-                            "site": currentRecord[0].site ? String(currentRecord[0].site) : "null",
-                            "division": currentRecord[0].division ? String(currentRecord[0].division) : "null",
-                            "description": currentRecord[0].description ? String(currentRecord[0].description) : "null",
-                            "businessReasons": currentRecord[0].businessReason ? currentRecord[0].businessReason : "null",
-                            "amount": currentRecord[0].amount ? String(currentRecord[0].amount) : "null",
-                            "currency": currentRecord[0].currency_code ? currentRecord[0].currency_code : "null",
-                            "appropriationsCosts": [
-                                {
-                                    "millLabor": currentRecord[0].millLabor ? String(currentRecord[0].millLabor) : "null",
-                                    "maintenanceLabor": currentRecord[0].maintenanceLabor ? String(currentRecord[0].maintenanceLabor) : "null",
-                                    "operationsLabor": currentRecord[0].operationsLabor ? String(currentRecord[0].operationsLabor) : "null",
-                                    "outsideContract": currentRecord[0].outsideContract ? String(currentRecord[0].outsideContract) : "null",
-                                    "materialCost": currentRecord[0].materialCost ? String(currentRecord[0].materialCost) : "null",
-                                    "hardwareCost": currentRecord[0].hardwareCost ? String(currentRecord[0].hardwareCost) : "null",
-                                    "softwareCost": currentRecord[0].softwareCost ? String(currentRecord[0].softwareCost) : "null",
-                                    "contingencyCost": currentRecord[0].contingencyCost ? String(currentRecord[0].contingencyCost) : "null",
-                                    "totalCost": currentRecord[0].totalCost ? String(currentRecord[0].totalCost) : "null"
-                                }
-                            ],
-                            "approver": lowestLevelEmail,
-                            "_id": currentRecord[0].ID ? String(currentRecord[0].ID) : "null",
-                            "childId": lowestLevelID ? String(lowestLevelID) : "null",
-                            "folderId": lowestFolderID ? String(lowestFolderID) : "null",
-                            "url": dynamicURL ? String(dynamicURL) : "null",
-                            "approverName": lowestName ? String(lowestName) : "null",
-                            "initiator": req.user.id,
-                            "initiatorName": req.user.id
-                        }
-                    };
+        //             let filteredApproverHistory = (currentRecord[0] && currentRecord[0].to_ApproverHistory)
+        //                 ? currentRecord[0].to_ApproverHistory.filter(history => history.status === 'Not initiated')
+        //                 : [];
 
-                    let BPA_WORKFLOW = await cds.connect.to('BPA_WORKFLOW');
+        //             if (filteredApproverHistory.length === 0) {
+        //                 filteredApproverHistory = currentRecord[0].to_ApproverHistory.filter(history => history.status === 'Skipped');
+        //             }
 
-                    let response = await BPA_WORKFLOW.send('POST', '/', testData);
+        //             if (filteredApproverHistory.length > 0) {
+        //                 const sortedApprovers = filteredApproverHistory.sort((a, b) => a.Level - b.Level);
+        //                 lowestLevelEmail = 'jibin.thomas@msitek.us';
+        //                 lowestLevelID = sortedApprovers[0]?.ID;
+        //                 lowestFolderID = currentRecord[0]?.attachments?.[0]?.folderId || null;
+        //                 const baseURL = "https://yk2lt6xsylvfx4dz.launchpad.cfapps.us10.hana.ondemand.com/site/Kruger#Zcapex-manage?sap-ui-app-id-hint=saas_approuter_capex&/Capex({documentID})?layout=TwoColumnsMidExpanded";
+        //                 dynamicURL = baseURL.replace("{documentID}", currentRecord[0]?.documentID);
+        //                 if (wf_status === 'Approved') {
+        //                     lowestName = currentRecord[0].to_ApproverHistory[0].approverName;
+        //                 } else if (wf_status === 'Skipped') {
+        //                     lowestName = sortedApprovers[0].approverName;
+        //                 }
 
-                    const updatedApproverHistory1 = await db.run(
-                        UPDATE(ApproverHistory)
-                            .set({
-                                instanceId: response.rootInstanceId
-                            })
-                            .where({ up__ID: currentRecord[0].ID, ID: lowestLevelID })
-                    )
+        //                 const lowestApprover = 'jibin.thomas@msitek.us';//currentRecord[0]?.attachments?.[0]?.email
+        //                 const updateMain = await UPDATE(Capex)
+        //                     .set({ currentApprover: lowestApprover })
+        //                     .where({ ID: wf_parentId });
 
-                    return {
-                        response: `${response} ${lowestLevelID} 'Workflow Triggered'`
-                    };
-                } else if (wf_status === 'Rejected') {
-                    const updatedApproverHistory = await db.run(
-                        UPDATE(ApproverHistory)
-                            .set({
-                                status: wf_status,
-                                comments: wf_comments
-                            })
-                            .where({ up__ID: wf_parentId, ID: wf_childId })
-                    );
-                    const newStatus = "E0010";
-                    await statusChange(req, wf_parentId, newStatus);
-                    return {
-                        response: 'Workflow Triggered Rejected'
-                    };
-                }
+        //                 if (wf_status === 'Approved') {
+        //                     const newStatus = currentRecord[0].to_ApproverHistory[0].estat;//"E0010";
+        //                     await statusChange(req, wf_parentId, newStatus);
+        //                 }
 
-            } catch (error) {
-                return {
-                    response: `Status update failed: ${error.message}`
-                }
-            }
-        });
+
+        //                 const updatedApproverHistory1 = await db.run(
+        //                     UPDATE(ApproverHistory)
+        //                         .set({
+        //                             status: 'Pending',
+        //                             days: '1',
+        //                             pendingDate: new Date().toISOString()
+        //                         })
+        //                         .where({ up__ID: wf_parentId, ID: lowestLevelID })
+        //                 );
+
+        //             } else {
+        //                 return {
+        //                     response: 'Workflow ended'
+        //                 };
+        //             }
+
+        //             let testData = {
+        //                 "definitionId": "us10.yk2lt6xsylvfx4dz.zcapexworkflow.triggerWorkflow",
+        //                 "context": {
+        //                     "orderNumber": currentRecord[0].orderNumber ? String(currentRecord[0].orderNumber) : "null",
+        //                     "orderType": currentRecord[0].orderType ? String(currentRecord[0].orderType) : "null",
+        //                     "companyCode": currentRecord[0].companyCode ? String(currentRecord[0].companyCode) : "null",
+        //                     "site": currentRecord[0].site ? String(currentRecord[0].site) : "null",
+        //                     "division": currentRecord[0].division ? String(currentRecord[0].division) : "null",
+        //                     "description": currentRecord[0].description ? String(currentRecord[0].description) : "null",
+        //                     "businessReasons": currentRecord[0].businessReason ? currentRecord[0].businessReason : "null",
+        //                     "amount": currentRecord[0].amount ? String(currentRecord[0].amount) : "null",
+        //                     "currency": currentRecord[0].currency_code ? currentRecord[0].currency_code : "null",
+        //                     "appropriationsCosts": [
+        //                         {
+        //                             "millLabor": currentRecord[0].millLabor ? String(currentRecord[0].millLabor) : "null",
+        //                             "maintenanceLabor": currentRecord[0].maintenanceLabor ? String(currentRecord[0].maintenanceLabor) : "null",
+        //                             "operationsLabor": currentRecord[0].operationsLabor ? String(currentRecord[0].operationsLabor) : "null",
+        //                             "outsideContract": currentRecord[0].outsideContract ? String(currentRecord[0].outsideContract) : "null",
+        //                             "materialCost": currentRecord[0].materialCost ? String(currentRecord[0].materialCost) : "null",
+        //                             "hardwareCost": currentRecord[0].hardwareCost ? String(currentRecord[0].hardwareCost) : "null",
+        //                             "softwareCost": currentRecord[0].softwareCost ? String(currentRecord[0].softwareCost) : "null",
+        //                             "contingencyCost": currentRecord[0].contingencyCost ? String(currentRecord[0].contingencyCost) : "null",
+        //                             "totalCost": currentRecord[0].totalCost ? String(currentRecord[0].totalCost) : "null"
+        //                         }
+        //                     ],
+        //                     "approver": lowestLevelEmail,
+        //                     "_id": currentRecord[0].ID ? String(currentRecord[0].ID) : "null",
+        //                     "childId": lowestLevelID ? String(lowestLevelID) : "null",
+        //                     "folderId": lowestFolderID ? String(lowestFolderID) : "null",
+        //                     "url": dynamicURL ? String(dynamicURL) : "null",
+        //                     "approverName": lowestName ? String(lowestName) : "null",
+        //                     "initiator": req.user.id,
+        //                     "initiatorName": req.user.id
+        //                 }
+        //             };
+
+        //             let BPA_WORKFLOW = await cds.connect.to('BPA_WORKFLOW');
+
+        //             let response = await BPA_WORKFLOW.send('POST', '/', testData);
+
+        //             const updatedApproverHistory1 = await db.run(
+        //                 UPDATE(ApproverHistory)
+        //                     .set({
+        //                         instanceId: response.rootInstanceId
+        //                     })
+        //                     .where({ up__ID: currentRecord[0].ID, ID: lowestLevelID })
+        //             )
+
+        //             return {
+        //                 response: `${response} ${lowestLevelID} 'Workflow Triggered'`
+        //             };
+        //         } else if (wf_status === 'Rejected') {
+        //             const updatedApproverHistory = await db.run(
+        //                 UPDATE(ApproverHistory)
+        //                     .set({
+        //                         status: wf_status,
+        //                         comments: wf_comments
+        //                     })
+        //                     .where({ up__ID: wf_parentId, ID: wf_childId })
+        //             );
+        //             const newStatus = "E0010";
+        //             await statusChange(req, wf_parentId, newStatus);
+        //             return {
+        //                 response: 'Workflow Triggered Rejected'
+        //             };
+        //         }
+
+        //     } catch (error) {
+        //         return {
+        //             response: `Status update failed: ${error.message}`
+        //         }
+        //     }
+        // });
 
         return super.init();
     }
 }
 
-module.exports = CapexCatalogService;
+module.exports = CapexCreatorCatalogService;
