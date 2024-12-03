@@ -38,101 +38,21 @@ class CapexCreatorCatalogService extends cds.ApplicationService {
         this.before('READ', Capex, async (req) => {
             try {
 
-                // const masterData = await ecc.tx(req).run(SELECT.from('MasterDataSet'));
-                // if (!masterData) {
-                //     return req.error(500, 'ECC Server could not be reached');
-                // }
-                // await Promise.all(masterData.map(async (item) => {
-                //     const existingRecord = await db.run(
-                //         SELECT.from(Capex).where({ orderNumber: item.orderNumber })
-                //     );
-
-                //     if (existingRecord.length === 0) {
-                //         // If the record doesn't exist, insert it
-                //         console.log(`Inserting new record with orderNumber: ${item.orderNumber}`);
-                //         const documentID = new SequenceHelper({
-                //             db: db,
-                //             sequence: "ZCAPEX_DOCUMENT_ID",
-                //             table: "zcapex_CapexEntity",
-                //             field: "documentID",
-                //         });
-
-                //         let number = await documentID.getNextNumber();
-                //         const insertStmt = INSERT.into(Capex).entries({
-                //             documentID: number.toString(),
-                //             orderNumber: item.orderNumber,
-                //             orderType: item.orderType,
-                //             companyCode: item.companyCode,
-                //             site: item.site,
-                //             division: item.division,
-                //             description: item.description,
-                //             businessReason: item.businessReason,
-                //             currency_code: item.currency,
-                //             appropriationLife: item.appropriationLife,
-                //             downtime: item.downtime,
-                //             amount: item.amount,
-                //             millLabor: item.millLabor,
-                //             maintenanceLabor: item.maintenanceLabor,
-                //             operationsLabor: item.operationsLabor,
-                //             outsideContract: item.outsideContract,
-                //             materialCost: item.materialCost,
-                //             hardwareCost: item.hardwareCost,
-                //             softwareCost: item.softwareCost,
-                //             contingencyCost: item.contingencyCost,
-                //             totalCost: item.totalCost,
-                //             profitImprovementPct: item.profitImprovementPct,
-                //             profitImprovementNPV: item.profitImprovementNPV,
-                //             paybackWithTaxes: item.paybackWithTaxes,
-                //             paybackWithoutTaxes: item.paybackWithoutTaxes,
-                //             oneTimeExpenses: item.oneTimeExpenses,
-                //             recurringExpenses: item.recurringExpenses,
-                //             startupDate: item.startupDate,
-                //             strategic: item.strategic,
-                //             businessSustaining: item.businessSustaining,
-                //             mandatory: item.mandatory,
-                //             profitImprovement: item.profitImprovement,
-                //             environmentalImpacts: item.environmentalImpacts,
-                //             safetyImplications: item.safetyImplications,
-                //             creditPotential: item.creditPotential,
-                //             insuranceApproval: item.insuranceApproval,
-                //             businessArea: item.businessArea,
-                //             controllingArea: item.controllingArea,
-                //             status: item.status,
-                //             stonr: item.stonr
-                //         });
-                //         await db.run(insertStmt);
-                //     } else {
-                //         // If the record exists, we do nothing
-                //         console.log(`Record with orderNumber: ${item.orderNumber} already exists. Skipping.`);
-                //     }
-                // }));
-                // console.log('Synchronization with ECC completed successfully');
-
-                // let userRoles;
-                // let createValue;
-                // let approveValue;
                 // try {
-                // Fetch only matching approvers
-                //     userRoles = await ecc.tx(req).run(
-                //         SELECT.from('UserRolesSet').where({
-                //             Email: 'JIBIN.THOMAS@KRUGER.COM'.toString()
-                //         })
-                //     );
-
-                //     if (userRoles[0]?.Create === 'X') {
-                //         createValue = true;
-                //         approveValue = false;
+                //     // Add a filter to fetch only records created by the current user
+                //     req.query.where({ createdBy: req.user.id });
+            
+                //     // Execute the query to check for records
+                //     const results = await cds.run(req.query);
+            
+                //     // If no records are found, reject the request with a custom message
+                //     if (results.length === 0) {
+                //         req.reject(404, 'No records found for the current user.');
                 //     }
-                //     else if (userRoles[0]?.Approve === 'X') {
-                //         createValue = false;
-                //         approveValue = true;
-                //     }
-
                 // } catch (error) {
-                //     console.error('Error fetching or processing user roles:', error);
+                //     // Handle errors gracefully
+                //     req.reject(500, `An error occurred: ${error.message}`);
                 // }
-
-                req.query.where({ createdBy: req.user.id });
 
                 let currentApprover;
                 const allRecords = await db.run(
@@ -311,50 +231,6 @@ class CapexCreatorCatalogService extends cds.ApplicationService {
                 // throw new Error('Failed to retrieve error count.');
             }
         });
-
-        // this.on('getStatusCount', async (req) => {
-        //     try {
-        //         const statusKeys = ['N', 'X', 'E0011', 'D', 'E0010', 'E0009']; // Example status keys
-        //         const statusCount = await getStatusCounts(statusKeys);
-
-        //         return statusCount;
-        //     } catch (error) {
-        //         // Handle errors gracefully
-        //         console.error('Error in getErrorCount:', error.message);
-        //         // throw new Error('Failed to retrieve error count.');
-        //     }
-        // });
-
-
-        // async function getStatusCounts(keys) {
-        //     const keyMappings = {
-        //         'N': 'inProgressCount',
-        //         'X': 'Count',
-        //         'E0011': 'rejectIncompleteCount',
-        //         'D': 'draftCount',
-        //         'E0010': 'rejectFinalCount',
-        //         'E0009': 'approvedCount'
-        //     };
-
-        //     const statusCount = {};
-
-        //     const conditions = keys.map(key => `status = '${key}'`).join(' OR ');
-        //     const query = SELECT
-        //         .from(Capex)
-        //         .columns(['status', 'COUNT(*) AS count'])
-        //         .where(conditions)
-        //         .groupBy('status');
-
-        //     const results = await db.run(query);
-
-        //     results.forEach(result => {
-        //         const mappedKey = keyMappings[result.status];
-        //         statusCount[mappedKey] = result.count;
-        //     });
-
-        //     return statusCount;
-        // }
-
 
 
         this.before('UPDATE', CashFlowYear.drafts, async (req) => {
@@ -578,7 +454,7 @@ class CapexCreatorCatalogService extends cds.ApplicationService {
                 const lowestLevelEmail = 'jibin.thomas@msitek.us';//sortedApprovers[0]?.Email;
                 const lowestLevelID = currentAppHis[0].ID;
                 const lowestFolderID = req.data.attachments[0]?.folderId;
-                const baseURL = "https://yk2lt6xsylvfx4dz.launchpad.cfapps.us10.hana.ondemand.com/site/Kruger#Zcapex-manage?sap-ui-app-id-hint=saas_approuter_capex&/Capex({documentID})?layout=TwoColumnsMidExpanded";
+                const baseURL = "https://yk2lt6xsylvfx4dz.launchpad.cfapps.us10.hana.ondemand.com/site/Kruger#zcapexapprover-manage?sap-ui-app-id-hint=saas_approuter_capex&/Capex({documentID})?layout=TwoColumnsMidExpanded";
                 const dynamicURL = baseURL.replace("{documentID}", req.data.documentID);
                 const lowestName = currentAppHis[0].approverName;
 
@@ -833,7 +709,7 @@ class CapexCreatorCatalogService extends cds.ApplicationService {
                         const sortedApprovers = filteredApproverHistory.sort((a, b) => a.Level - b.Level);
                         lowestLevelEmail = 'jibin.thomas@msitek.us';//currentRecord[0]?.attachments?.[0]?.email  
                         lowestFolderID = currentRecord[0]?.attachments?.[0]?.folderId || null;
-                        const baseURL = "https://yk2lt6xsylvfx4dz.launchpad.cfapps.us10.hana.ondemand.com/site/Kruger#Zcapex-manage?sap-ui-app-id-hint=saas_approuter_capex&/Capex({documentID})?layout=TwoColumnsMidExpanded";
+                        const baseURL = "https://yk2lt6xsylvfx4dz.launchpad.cfapps.us10.hana.ondemand.com/site/Kruger#zcapexapprover-manage?sap-ui-app-id-hint=saas_approuter_capex&/Capex({documentID})?layout=TwoColumnsMidExpanded";
                         dynamicURL = baseURL.replace("{documentID}", currentRecord[0]?.documentID);
                         if (wf_status === 'Approved') {
                             lowestName = currentRecord[0].to_ApproverHistory[0].approverName;
@@ -969,201 +845,6 @@ class CapexCreatorCatalogService extends cds.ApplicationService {
                 }
             }
         }
-
-        // this.on("validate", async req => {
-        //     const Status = 'Skipped';
-        //     const Comments = req.data.text
-        //     await approveChange(req, Status, Comments);
-        // });
-
-        // this.on("rejectFinal2", async req => {
-        //     const Status = 'Rejected';
-        //     const Comments = req.data.text;
-        //     await approveChange(req, Status, Comments);
-        // });
-
-        // this.on("rejectIncomplete", async (req) => {
-        //     // const { ID } = req.params[0];
-        //     // const newStatus = "E0011";
-        //     // await statusChange(req, ID, newStatus);
-        //     const Comments = req.data.text
-        //     const Status = 'Rework';
-        //     await approveChange(req, Status, Comments);
-        // });
-
-        // this.on("approve", async (req) => {
-        //     // const { ID } = req.params[0];
-        //     const Status = 'Approved';
-        //     await approveChange(req, Status);
-        //     // const newStatus = "E0009";
-        //     // await statusChange(req, ID, newStatus);
-        // });
-
-        // this.on("workflow", async (req) => {
-        //     const wf_parentId = req.params[0].ID;
-        //     const wf_childId = req.data.childId;
-        //     const wf_status = req.data.status;
-        //     const wf_comments = req.data.comments;
-        //     try {
-        //         if (wf_status === 'Approved' || wf_status === 'Skipped') {
-        //             const updatedApproverHistory = await db.run(
-        //                 UPDATE(ApproverHistory)
-        //                     .set({
-        //                         status: wf_status,
-        //                         // comments: wf_comments
-        //                     })
-        //                     .where({ up__ID: wf_parentId, ID: wf_childId })
-        //             );
-
-        //             if (wf_comments) {
-        //                 const newComment = {
-        //                     up__ID: wf_parentId,
-        //                     text: wf_comments
-        //                 };
-
-        //                 const insertedComment = await db.run(
-        //                     INSERT.into(Comments).entries(newComment)
-        //                 );
-        //             }
-
-
-        //             const currentRecord = await db.run(
-        //                 SELECT.from(Capex)
-        //                     .columns(cpx => {
-        //                         cpx`*`,
-        //                             cpx.to_ApproverHistory(cfy => { cfy`*` }),
-        //                             cpx.attachments(atch => { atch`*` })
-        //                     })
-        //                     .where({ ID: wf_parentId })
-        //             );
-
-        //             let lowestLevelEmail;
-        //             let lowestLevelID;
-        //             let lowestFolderID;
-        //             let dynamicURL;
-        //             let lowestName;
-
-        //             let filteredApproverHistory = (currentRecord[0] && currentRecord[0].to_ApproverHistory)
-        //                 ? currentRecord[0].to_ApproverHistory.filter(history => history.status === 'Not initiated')
-        //                 : [];
-
-        //             if (filteredApproverHistory.length === 0) {
-        //                 filteredApproverHistory = currentRecord[0].to_ApproverHistory.filter(history => history.status === 'Skipped');
-        //             }
-
-        //             if (filteredApproverHistory.length > 0) {
-        //                 const sortedApprovers = filteredApproverHistory.sort((a, b) => a.Level - b.Level);
-        //                 lowestLevelEmail = 'jibin.thomas@msitek.us';
-        //                 lowestLevelID = sortedApprovers[0]?.ID;
-        //                 lowestFolderID = currentRecord[0]?.attachments?.[0]?.folderId || null;
-        //                 const baseURL = "https://yk2lt6xsylvfx4dz.launchpad.cfapps.us10.hana.ondemand.com/site/Kruger#Zcapex-manage?sap-ui-app-id-hint=saas_approuter_capex&/Capex({documentID})?layout=TwoColumnsMidExpanded";
-        //                 dynamicURL = baseURL.replace("{documentID}", currentRecord[0]?.documentID);
-        //                 if (wf_status === 'Approved') {
-        //                     lowestName = currentRecord[0].to_ApproverHistory[0].approverName;
-        //                 } else if (wf_status === 'Skipped') {
-        //                     lowestName = sortedApprovers[0].approverName;
-        //                 }
-
-        //                 const lowestApprover = 'jibin.thomas@msitek.us';//currentRecord[0]?.attachments?.[0]?.email
-        //                 const updateMain = await UPDATE(Capex)
-        //                     .set({ currentApprover: lowestApprover })
-        //                     .where({ ID: wf_parentId });
-
-        //                 if (wf_status === 'Approved') {
-        //                     const newStatus = currentRecord[0].to_ApproverHistory[0].estat;//"E0010";
-        //                     await statusChange(req, wf_parentId, newStatus);
-        //                 }
-
-
-        //                 const updatedApproverHistory1 = await db.run(
-        //                     UPDATE(ApproverHistory)
-        //                         .set({
-        //                             status: 'Pending',
-        //                             days: '1',
-        //                             pendingDate: new Date().toISOString()
-        //                         })
-        //                         .where({ up__ID: wf_parentId, ID: lowestLevelID })
-        //                 );
-
-        //             } else {
-        //                 return {
-        //                     response: 'Workflow ended'
-        //                 };
-        //             }
-
-        //             let testData = {
-        //                 "definitionId": "us10.yk2lt6xsylvfx4dz.zcapexworkflow.triggerWorkflow",
-        //                 "context": {
-        //                     "orderNumber": currentRecord[0].orderNumber ? String(currentRecord[0].orderNumber) : "null",
-        //                     "orderType": currentRecord[0].orderType ? String(currentRecord[0].orderType) : "null",
-        //                     "companyCode": currentRecord[0].companyCode ? String(currentRecord[0].companyCode) : "null",
-        //                     "site": currentRecord[0].site ? String(currentRecord[0].site) : "null",
-        //                     "division": currentRecord[0].division ? String(currentRecord[0].division) : "null",
-        //                     "description": currentRecord[0].description ? String(currentRecord[0].description) : "null",
-        //                     "businessReasons": currentRecord[0].businessReason ? currentRecord[0].businessReason : "null",
-        //                     "amount": currentRecord[0].amount ? String(currentRecord[0].amount) : "null",
-        //                     "currency": currentRecord[0].currency_code ? currentRecord[0].currency_code : "null",
-        //                     "appropriationsCosts": [
-        //                         {
-        //                             "millLabor": currentRecord[0].millLabor ? String(currentRecord[0].millLabor) : "null",
-        //                             "maintenanceLabor": currentRecord[0].maintenanceLabor ? String(currentRecord[0].maintenanceLabor) : "null",
-        //                             "operationsLabor": currentRecord[0].operationsLabor ? String(currentRecord[0].operationsLabor) : "null",
-        //                             "outsideContract": currentRecord[0].outsideContract ? String(currentRecord[0].outsideContract) : "null",
-        //                             "materialCost": currentRecord[0].materialCost ? String(currentRecord[0].materialCost) : "null",
-        //                             "hardwareCost": currentRecord[0].hardwareCost ? String(currentRecord[0].hardwareCost) : "null",
-        //                             "softwareCost": currentRecord[0].softwareCost ? String(currentRecord[0].softwareCost) : "null",
-        //                             "contingencyCost": currentRecord[0].contingencyCost ? String(currentRecord[0].contingencyCost) : "null",
-        //                             "totalCost": currentRecord[0].totalCost ? String(currentRecord[0].totalCost) : "null"
-        //                         }
-        //                     ],
-        //                     "approver": lowestLevelEmail,
-        //                     "_id": currentRecord[0].ID ? String(currentRecord[0].ID) : "null",
-        //                     "childId": lowestLevelID ? String(lowestLevelID) : "null",
-        //                     "folderId": lowestFolderID ? String(lowestFolderID) : "null",
-        //                     "url": dynamicURL ? String(dynamicURL) : "null",
-        //                     "approverName": lowestName ? String(lowestName) : "null",
-        //                     "initiator": req.user.id,
-        //                     "initiatorName": req.user.id
-        //                 }
-        //             };
-
-        //             let BPA_WORKFLOW = await cds.connect.to('BPA_WORKFLOW');
-
-        //             let response = await BPA_WORKFLOW.send('POST', '/', testData);
-
-        //             const updatedApproverHistory1 = await db.run(
-        //                 UPDATE(ApproverHistory)
-        //                     .set({
-        //                         instanceId: response.rootInstanceId
-        //                     })
-        //                     .where({ up__ID: currentRecord[0].ID, ID: lowestLevelID })
-        //             )
-
-        //             return {
-        //                 response: `${response} ${lowestLevelID} 'Workflow Triggered'`
-        //             };
-        //         } else if (wf_status === 'Rejected') {
-        //             const updatedApproverHistory = await db.run(
-        //                 UPDATE(ApproverHistory)
-        //                     .set({
-        //                         status: wf_status,
-        //                         comments: wf_comments
-        //                     })
-        //                     .where({ up__ID: wf_parentId, ID: wf_childId })
-        //             );
-        //             const newStatus = "E0010";
-        //             await statusChange(req, wf_parentId, newStatus);
-        //             return {
-        //                 response: 'Workflow Triggered Rejected'
-        //             };
-        //         }
-
-        //     } catch (error) {
-        //         return {
-        //             response: `Status update failed: ${error.message}`
-        //         }
-        //     }
-        // });
 
         return super.init();
     }

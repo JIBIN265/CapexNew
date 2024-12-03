@@ -200,14 +200,6 @@ class CapexCatalogService extends cds.ApplicationService {
                             )
                     )
                 ]);
-                // const allRecords1 = await db.run(
-                //     SELECT.from(Capex)
-                //         .columns(cpx => {
-                //             cpx`*`,
-                //                 cpx.to_ApproverHistory(cfy => { cfy`*` });
-                //         })
-                // );
-                // debugger;
 
             } catch (error) {
                 console.error('Error during synchronization:', error);

@@ -3,9 +3,9 @@ using {sap.common as common} from '../db/common';
 using {ZODATA_INTERNAL_ORDER_SRV as external} from './external/ZODATA_INTERNAL_ORDER_SRV';
 
 
-service CapexApproverCatalogService @(path:'approver') @(requires: 'authenticated-user') {
+service CapexApproverCatalogService @(path: 'approver') @(requires: 'authenticated-user') {
 
-    entity Capex  as projection on persistence.CapexEntity
+    entity Capex                 as projection on persistence.CapexEntity
         actions {
             action validate()                                                                                   returns Capex;
             @(Common.IsActionCritical: true)
@@ -53,19 +53,13 @@ service CapexApproverCatalogService @(path:'approver') @(requires: 'authenticate
 
         };
 
-    entity Comments as projection on persistence.CapexEntity.to_Comments;
-
-    entity CashFlowYear as projection on persistence.CapexEntity.to_CashFlowYear;
-
-    entity Objectives  as projection on persistence.CapexEntity.to_Objectives;
-
-    entity RejectionReasons as projection on persistence.CapexEntity.to_RejectionReasons;
-
-    entity ApproverHistory as projection on persistence.CapexEntity.to_ApproverHistory;
-
-    entity Notes   as projection on persistence.CapexEntity.to_Notes;
-
-    entity Sustainability2030 as projection on persistence.Sustainability2030;
+    entity Comments              as projection on persistence.CapexEntity.to_Comments;
+    entity CashFlowYear          as projection on persistence.CapexEntity.to_CashFlowYear;
+    entity Objectives            as projection on persistence.CapexEntity.to_Objectives;
+    entity RejectionReasons      as projection on persistence.CapexEntity.to_RejectionReasons;
+    entity ApproverHistory       as projection on persistence.CapexEntity.to_ApproverHistory;
+    entity Notes                 as projection on persistence.CapexEntity.to_Notes;
+    entity Sustainability2030    as projection on persistence.Sustainability2030;
 
     @readonly
     entity CompanyCode           as projection on persistence.CompanyCode;
