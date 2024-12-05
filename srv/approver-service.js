@@ -39,22 +39,17 @@ class CapexApproverCatalogService extends cds.ApplicationService {
             try {
 
 
-                // try {
-                //     // Add a filter to fetch only records created by the current user
-                //     req.query.where({ currentApprover: req.user.id });
+                try {
+                    // Add a filter to fetch only records created by the current user
+                    req.query.where({ currentApprover: req.user.id });
 
-                //     // Execute the query to check for records
-                //     const results = await cds.run(req.query);
+                    // Execute the query to check for records
+                    const results = await cds.run(req.query);
 
-                //     // If no records are found, reject the request with a custom message
-                //     if (results.length === 0) {
-                //         req.reject(404, 'No records found for the current user.');
-                //     }
-                // } catch (error) {
-                //     // Handle errors gracefully
-                //     req.reject(500, `An error occurred: ${error.message}`);
-                // }
-                let currentApprover;
+                } catch (error) {
+                    // Handle errors gracefully
+                    req.reject(500, `An error occurred: ${error.message}`);
+                }
                 const allRecords = await db.run(
                     SELECT.from(Capex)
                         .columns(cpx => {
@@ -62,14 +57,6 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                                 cpx.to_ApproverHistory(cfy => { cfy`*` });
                         })
                 );
-
-                const filteredRecords = allRecords
-                    .map(record => ({
-                        ...record,
-                        to_ApproverHistory: record.to_ApproverHistory.filter(filter => filter.email === 'JOHN.GRANGE@KRUGERPRODUCTS.CA')
-                    }))
-                    .filter(record => record.to_ApproverHistory.length > 0);
-                // filteredRecord = allRecords[0].to_ApproverHistory.filter(filter => filter.email === 'JOHN.GRANGE@KRUGERPRODUCTS.CA');
 
                 for (let capex of allRecords) {
                     // Calculate the total number of approvals and count of approved statuses
@@ -83,10 +70,10 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                             const today = new Date();
                             const diffTime = today - pendingDate;
                             history.days = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); // Calculate days difference
-                            currentApprover = 'jibin.thomas@msitek.us';//history.email;
+                            capex.currentApprover = 'jibin.thomas@msitek.us';//history.email;
                         } else {
                             history.days = null; // Clear days if not pending
-                            currentApprover = null;
+                            capex.currentApprover = null;
                         }
                     }
                 }
@@ -100,9 +87,7 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                                 .set({
                                     totalApprovals: capex.totalApprovals,
                                     approvedCount: capex.approvedCount,
-                                    currentApprover: currentApprover,
-                                    // createEnabled: createValue,
-                                    // approveEnabled: approveValue
+                                    currentApprover: capex.currentApprover,
                                 })
                                 .where({ ID: capex.ID })
                         )
@@ -120,14 +105,6 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                             )
                     )
                 ]);
-                // const allRecords1 = await db.run(
-                //     SELECT.from(Capex)
-                //         .columns(cpx => {
-                //             cpx`*`,
-                //                 cpx.to_ApproverHistory(cfy => { cfy`*` });
-                //         })
-                // );
-                // debugger;
 
             } catch (error) {
                 console.error('Error during synchronization:', error);
@@ -196,9 +173,7 @@ class CapexApproverCatalogService extends cds.ApplicationService {
 
         async function approveChange(req, Status, wfComments) {
             const wf_parentId = req.params[0];
-            //const wf_childId = req.data.childId;
             const wf_status = Status;
-            // const wf_comments = req.data.comments;
             try {
                 const currentRecord = await db.run(
                     SELECT.from(Capex)
@@ -210,8 +185,13 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                         })
                         .where({ ID: wf_parentId })
                 );
+
+                if (!currentRecord[0].currentApprover) {
+                    req.error(404, 'Capex Order Approval Already Completed!');
+                }
+                if (req.errors) { req.reject(); }
                 let wf_instanceID;
-                if (Comments) {
+                if (wfComments) {
                     const newComment = {
                         up__ID: wf_parentId,
                         text: wfComments
@@ -221,7 +201,7 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                             INSERT.into(Comments).entries(newComment)
                         );
                     } catch (error) {
-                        console.error("Error deleting workflow instance:", error);
+                        console.error("Error Inserting Feed:", error);
                     }
 
                 }
@@ -256,6 +236,7 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                     if (filteredApproverHistory.length > 0) {
                         const sortedApprovers = filteredApproverHistory.sort((a, b) => a.Level - b.Level);
                         lowestLevelEmail = 'jibin.thomas@msitek.us';//currentRecord[0]?.attachments?.[0]?.email  
+                        lowestLevelID = sortedApprovers[0]?.ID;
                         lowestFolderID = currentRecord[0]?.attachments?.[0]?.folderId || null;
                         const baseURL = "https://yk2lt6xsylvfx4dz.launchpad.cfapps.us10.hana.ondemand.com/site/Kruger#zcapexapprover-manage?sap-ui-app-id-hint=saas_approuter_capex&/Capex({documentID})?layout=TwoColumnsMidExpanded";
                         dynamicURL = baseURL.replace("{documentID}", currentRecord[0]?.documentID);
@@ -395,21 +376,30 @@ class CapexApproverCatalogService extends cds.ApplicationService {
         }
 
         this.on("validate", async req => {
-            const Status = 'Skipped';
             const Comments = req.data.text
+            if (!Comments || Comments.trim() === '') {
+                req.error(400, 'The "Reason for Skipping" field is mandatory.');
+                return;
+            }
+            const Status = 'Skipped';
             await approveChange(req, Status, Comments);
         });
 
         this.on("rejectFinal2", async req => {
-            const Status = 'Rejected';
             const Comments = req.data.text;
+            if (!Comments || Comments.trim() === '') {
+                req.error(400, 'The "Reason for Rejection" field is mandatory.');
+                return;
+            }
+            const Status = 'Rejected';
             await approveChange(req, Status, Comments);
         });
 
         this.on("rejectIncomplete", async (req) => {
-            // const { ID } = req.params[0];
-            // const newStatus = "E0011";
-            // await statusChange(req, ID, newStatus);
+            if (!Comments || Comments.trim() === '') {
+                req.error(400, 'The "Reason for Rework" field is mandatory.');
+                return;
+            }
             const Comments = req.data.text
             const Status = 'Rework';
             await approveChange(req, Status, Comments);

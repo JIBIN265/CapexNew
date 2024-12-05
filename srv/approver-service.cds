@@ -7,7 +7,7 @@ service CapexApproverCatalogService @(path: 'approver') @(requires: 'authenticat
 
     entity Capex                 as projection on persistence.CapexEntity
         actions {
-            action validate()                                                                                   returns Capex;
+            action validate(text : String  @Common.Label:'Reason for Skip?'  @UI.MultiLineText:true  )                                                                                   returns Capex;
             @(Common.IsActionCritical: true)
             @(
                 cds.odata.bindingparameter.name: '_it',
@@ -20,13 +20,13 @@ service CapexApproverCatalogService @(path: 'approver') @(requires: 'authenticat
                 Common.SideEffects             : {TargetEntities: ['$Return']}
             )
 
-            action rejectFinal2(text : String  @Common.Label:'Reason for rejection'  @UI.MultiLineText:true  )  returns Capex;
+            action rejectFinal2(text : String  @Common.Label:'Reason for Rejection?'  @UI.MultiLineText:true  )  returns Capex;
 
             @(
                 cds.odata.bindingparameter.name: '_it',
                 Common.SideEffects             : {TargetEntities: ['$Return']}
             )
-            action rejectIncomplete(text : String  @Common.Label:'Reason for Rework'  @UI.MultiLineText:true  ) returns Capex;
+            action rejectIncomplete(text : String  @Common.Label:'Reason for Rework?'  @UI.MultiLineText:true  ) returns Capex;
 
             @(
                 cds.odata.bindingparameter.name: '_it',

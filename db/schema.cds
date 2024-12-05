@@ -320,9 +320,6 @@ aspect ApproverHistory : cuid, managed {
   @description: 'Number of Days'
   days         : String(10);
 
-  // @comments   : 'Comments'
-  // comments     : String(1000);
-
   @comments   : 'ECC Status'
   estat        : String(10);
 
@@ -331,6 +328,9 @@ aspect ApproverHistory : cuid, managed {
 
   @comments   : 'Instance Id'
   instanceId   : String(40);
+
+  @comments   : 'Zapp_Level_ECC'
+  zappLevel    : String(2);
 
 }
 

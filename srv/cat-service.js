@@ -548,7 +548,8 @@ class CapexCatalogService extends cds.ApplicationService {
                     days: index === 0 ? '1' : null,
                     pendingDate: index === 0 ? new Date().toISOString() : null,
                     approverName: approver.Name,
-                    estat: approver.Estat
+                    estat: approver.Estat,
+                    zappLevel: approver.InternalLevel
                 }));
 
                 // Explicitly update the entity if needed

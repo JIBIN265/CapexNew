@@ -38,21 +38,17 @@ class CapexCreatorCatalogService extends cds.ApplicationService {
         this.before('READ', Capex, async (req) => {
             try {
 
-                // try {
-                //     // Add a filter to fetch only records created by the current user
-                //     req.query.where({ createdBy: req.user.id });
-            
-                //     // Execute the query to check for records
-                //     const results = await cds.run(req.query);
-            
-                //     // If no records are found, reject the request with a custom message
-                //     if (results.length === 0) {
-                //         req.reject(404, 'No records found for the current user.');
-                //     }
-                // } catch (error) {
-                //     // Handle errors gracefully
-                //     req.reject(500, `An error occurred: ${error.message}`);
-                // }
+                try {
+                    // Add a filter to fetch only records created by the current user
+                    req.query.where({ createdBy: req.user.id });
+
+                    // Execute the query to check for records
+                    const results = await cds.run(req.query);
+
+                } catch (error) {
+                    // Handle errors gracefully
+                    req.reject(500, `An error occurred: ${error.message}`);
+                }
 
                 let currentApprover;
                 const allRecords = await db.run(
@@ -142,8 +138,9 @@ class CapexCreatorCatalogService extends cds.ApplicationService {
 
             if (req.target.name !== "CapexCreatorCatalogService.Capex.drafts") { return; }
             const { ID } = req.data;
-            req.data.status = process.env.DRAFTSTATUS;
-            if (!req.data.companyCode) { req.data.companyCode = process.env.COMPANYCODE; }
+            req.data.status = 'D';//process.env.DRAFTSTATUS;
+            req.data.currency_code = 'CAD';
+            if (!req.data.companyCode) { req.data.companyCode = '2000'; }//process.env.COMPANYCODE; }
 
             const documentID = new SequenceHelper({
                 db: db,
@@ -214,13 +211,13 @@ class CapexCreatorCatalogService extends cds.ApplicationService {
             // console.log(req.data)
 
         });
-        
+
         this.on('getMessages', async (req) => {
             const { Key } = req.data
             try {
 
                 const { text } = await db.run(SELECT.one.from(Comments)
-                        .columns(['text']).where({ up__ID: Key }));
+                    .columns(['text']).where({ up__ID: Key }));
                 const messageImport = {
                     notes: text
                 }
@@ -432,7 +429,8 @@ class CapexCreatorCatalogService extends cds.ApplicationService {
                     days: index === 0 ? '1' : null,
                     pendingDate: index === 0 ? new Date().toISOString() : null,
                     approverName: approver.Name,
-                    estat: approver.Estat
+                    estat: approver.Estat,
+                    zappLevel: approver.InternalLevel
                 }));
 
                 // Explicitly update the entity if needed
@@ -663,7 +661,7 @@ class CapexCreatorCatalogService extends cds.ApplicationService {
                         .where({ ID: wf_parentId })
                 );
                 let wf_instanceID;
-                if (Comments) {
+                if (wfComments) {
                     const newComment = {
                         up__ID: wf_parentId,
                         text: wfComments
