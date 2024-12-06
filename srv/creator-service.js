@@ -39,7 +39,7 @@ class CapexCreatorCatalogService extends cds.ApplicationService {
             let results;
             try {
                 // Add a filter to fetch only records created by the current user
-                req.query.where({ createdBy: 'jibin.thomas@msitekus.com' });//req.user.id });
+                req.query.where({ createdBy: req.user.id });
 
                 // Execute the query to check for records
                 results = await cds.run(req.query);
@@ -380,7 +380,7 @@ class CapexCreatorCatalogService extends cds.ApplicationService {
                 req.data.to_ApproverHistory = sortedApprovers.map((approver, index) => ({
                     site: approver.Site,
                     level: approver.Level,
-                    email: approver.Email,
+                    email: approver.Email ? approver.Email.toLowerCase() : null,
                     status: index === 0 ? 'Pending' : 'Not initiated',
                     days: index === 0 ? '1' : null,
                     pendingDate: index === 0 ? new Date().toISOString() : null,
@@ -395,7 +395,7 @@ class CapexCreatorCatalogService extends cds.ApplicationService {
                     .where({ ID: req.data.ID });
 
 
-                currentApprover = 'jibin.thomas@msitek.us';  ///sortedApprovers[0]?.Email
+                currentApprover = sortedApprovers[0]?.Email
                 const updateMain = await UPDATE(Capex)
                     .set({
                         totalApprovals: req.data.to_ApproverHistory.length,
@@ -409,11 +409,13 @@ class CapexCreatorCatalogService extends cds.ApplicationService {
                         .where({ up__ID: req.data.ID, status: 'Pending' })
                 );
 
-                const lowestLevelEmail = 'jibin.thomas@msitek.us';//sortedApprovers[0]?.Email;
+                const lowestLevelEmail = currentApprover;
                 const lowestLevelID = currentAppHis[0].ID;
                 const lowestFolderID = req.data.attachments[0]?.folderId;
                 const baseURL = "https://yk2lt6xsylvfx4dz.launchpad.cfapps.us10.hana.ondemand.com/site/Kruger#zcapexapprover-manage?sap-ui-app-id-hint=saas_approuter_capex&/Capex({documentID})?layout=TwoColumnsMidExpanded";
-                const dynamicURL = baseURL.replace("{documentID}", req.data.documentID);
+                const dynamicURL = baseURL.replace("{documentID}", req.data.ID);
+                const userURL = "https://yk2lt6xsylvfx4dz.launchpad.cfapps.us10.hana.ondemand.com/site?siteId=4bf2f916-b150-4361-918c-8a51f5b9c835#zcapexcreator-manage?sap-ui-app-id-hint=saas_approuter_zcapexcreator&/Capex({documentID})?layout=TwoColumnsMidExpanded";
+                const dyuserURL = userURL.replace("{documentID}", req.data.documentID);
                 const lowestName = currentAppHis[0].approverName;
 
 
@@ -449,7 +451,12 @@ class CapexCreatorCatalogService extends cds.ApplicationService {
                         "url": dynamicURL ? String(dynamicURL) : "null",
                         "approverName": lowestName ? String(lowestName) : "null",
                         "initiator": req.user.id,
-                        "initiatorName": req.user.id
+                        "initiatorName": req.user.id,
+                        "userUrl": dyuserURL ? String(dynamicURL) : "null",
+                        "action": "Create",
+                        "decision": "",
+                        "appComments": ""
+
                     }
                 };
 
@@ -610,206 +617,6 @@ class CapexCreatorCatalogService extends cds.ApplicationService {
                         status: "Error",
                     }
                     return req.reply(finalReturn);
-                }
-            }
-        }
-
-        async function approveChange(req, Status, wfComments) {
-            const wf_parentId = req.params[0].ID;
-            //const wf_childId = req.data.childId;
-            const wf_status = Status;
-            // const wf_comments = req.data.comments;
-            try {
-                const currentRecord = await db.run(
-                    SELECT.from(Capex)
-                        .columns(cpx => {
-                            cpx`*`,
-                                cpx.to_ApproverHistory(cfy => { cfy`*` }),
-                                cpx.attachments(atch => { atch`*` }),
-                                cpx.to_Comments(cmt => { cmt`*` })
-                        })
-                        .where({ ID: wf_parentId })
-                );
-                let wf_instanceID;
-                if (wfComments) {
-                    const newComment = {
-                        up__ID: wf_parentId,
-                        text: wfComments
-                    };
-                    try {
-                        const insertedComment = await db.run(
-                            INSERT.into(Comments).entries(newComment)
-                        );
-                    } catch (error) {
-                        console.error("Error deleting workflow instance:", error);
-                    }
-
-                }
-                const wf_childId = currentRecord[0]?.to_ApproverHistory?.find(record => record.status === 'Pending')?.ID;
-                wf_instanceID = currentRecord[0]?.to_ApproverHistory?.find(record => record.status === 'Pending')?.instanceId;
-                if (wf_status === 'Approved' || wf_status === 'Skipped') {
-                    const updatedApproverHistory = await db.run(
-                        UPDATE(ApproverHistory)
-                            .set({
-                                status: wf_status
-                                // comments: wf_comments
-                            })
-                            .where({ up__ID: wf_parentId, ID: wf_childId })
-                    );
-
-                    let lowestLevelEmail;
-                    let lowestLevelID;
-                    let lowestFolderID;
-                    let dynamicURL;
-                    let lowestName;
-                    let lowestApprover;
-
-
-                    let filteredApproverHistory = (currentRecord[0] && currentRecord[0].to_ApproverHistory)
-                        ? currentRecord[0].to_ApproverHistory.filter(history => history.status === 'Not initiated')
-                        : [];
-
-                    if (filteredApproverHistory.length === 0) {
-                        filteredApproverHistory = currentRecord[0].to_ApproverHistory.filter(history => history.status === 'Skipped');
-                    }
-
-                    if (filteredApproverHistory.length > 0) {
-                        const sortedApprovers = filteredApproverHistory.sort((a, b) => a.Level - b.Level);
-                        lowestLevelEmail = 'jibin.thomas@msitek.us';//currentRecord[0]?.attachments?.[0]?.email  
-                        lowestFolderID = currentRecord[0]?.attachments?.[0]?.folderId || null;
-                        const baseURL = "https://yk2lt6xsylvfx4dz.launchpad.cfapps.us10.hana.ondemand.com/site/Kruger#zcapexapprover-manage?sap-ui-app-id-hint=saas_approuter_zcapexapprover&/Capex({documentID})?layout=TwoColumnsMidExpanded";
-                        dynamicURL = baseURL.replace("{documentID}", currentRecord[0]?.ID);
-                        if (wf_status === 'Approved') {
-                            lowestName = currentRecord[0].to_ApproverHistory[0].approverName;
-                        } else if (wf_status === 'Skipped') {
-                            lowestName = sortedApprovers[0].approverName;
-                            wf_instanceID = sortedApprovers[0].instanceId;
-                        }
-
-                        const updatedApproverHistory1 = await db.run(
-                            UPDATE(ApproverHistory)
-                                .set({
-                                    status: 'Pending',
-                                    days: '1',
-                                    pendingDate: new Date().toISOString()
-                                })
-                                .where({ up__ID: wf_parentId, ID: lowestLevelID })
-                        );
-                        if (wf_status === 'Approved') {
-                            const newStatus = currentRecord[0].to_ApproverHistory[0].estat;//"E0010";
-                            await statusChange(req, wf_parentId, newStatus);
-                        }
-
-                    } else {
-                        return {
-                            response: 'Workflow ended'
-                        };
-                    }
-
-                    let testData = {
-                        "definitionId": "us10.yk2lt6xsylvfx4dz.zcapexworkflow.triggerWorkflow",
-                        "context": {
-                            "orderNumber": currentRecord[0].orderNumber ? String(currentRecord[0].orderNumber) : "null",
-                            "orderType": currentRecord[0].orderType ? String(currentRecord[0].orderType) : "null",
-                            "companyCode": currentRecord[0].companyCode ? String(currentRecord[0].companyCode) : "null",
-                            "site": currentRecord[0].site ? String(currentRecord[0].site) : "null",
-                            "division": currentRecord[0].division ? String(currentRecord[0].division) : "null",
-                            "description": currentRecord[0].description ? String(currentRecord[0].description) : "null",
-                            "businessReasons": currentRecord[0].businessReason ? currentRecord[0].businessReason : "null",
-                            "amount": currentRecord[0].amount ? String(currentRecord[0].amount) : "null",
-                            "currency": currentRecord[0].currency_code ? currentRecord[0].currency_code : "null",
-                            "appropriationsCosts": [
-                                {
-                                    "millLabor": currentRecord[0].millLabor ? String(currentRecord[0].millLabor) : "null",
-                                    "maintenanceLabor": currentRecord[0].maintenanceLabor ? String(currentRecord[0].maintenanceLabor) : "null",
-                                    "operationsLabor": currentRecord[0].operationsLabor ? String(currentRecord[0].operationsLabor) : "null",
-                                    "outsideContract": currentRecord[0].outsideContract ? String(currentRecord[0].outsideContract) : "null",
-                                    "materialCost": currentRecord[0].materialCost ? String(currentRecord[0].materialCost) : "null",
-                                    "hardwareCost": currentRecord[0].hardwareCost ? String(currentRecord[0].hardwareCost) : "null",
-                                    "softwareCost": currentRecord[0].softwareCost ? String(currentRecord[0].softwareCost) : "null",
-                                    "contingencyCost": currentRecord[0].contingencyCost ? String(currentRecord[0].contingencyCost) : "null",
-                                    "totalCost": currentRecord[0].totalCost ? String(currentRecord[0].totalCost) : "null"
-                                }
-                            ],
-                            "approver": lowestLevelEmail,
-                            "_id": currentRecord[0].ID ? String(currentRecord[0].ID) : "null",
-                            "childId": lowestLevelID ? String(lowestLevelID) : "null",
-                            "folderId": lowestFolderID ? String(lowestFolderID) : "null",
-                            "url": dynamicURL ? String(dynamicURL) : "null",
-                            "approverName": lowestName ? String(lowestName) : "null",
-                            "initiator": req.user.id,
-                            "initiatorName": req.user.id
-
-                        }
-                    };
-
-                    let BPA_WORKFLOW = await cds.connect.to('BPA_WORKFLOW');
-
-                    let response = await BPA_WORKFLOW.send('POST', '/', testData);
-
-                    const updatedApproverHistory1 = await db.run(
-                        UPDATE(ApproverHistory)
-                            .set({
-                                instanceId: response.rootInstanceId
-                            })
-                            .where({ up__ID: currentRecord[0].ID, ID: lowestLevelID })
-                    )
-
-                    let deletePayload = [
-                        {
-                            id: wf_instanceID, // ID of the workflow instance to delete
-                            deleted: true           // Mark it for deletion
-                        }
-                    ];
-
-                    try {
-                        // Send the PATCH request
-                        let deleteResponse = await BPA_WORKFLOW.send('PATCH', '/', deletePayload);
-
-                        console.log("Workflow instance deleted successfully:", deleteResponse);
-                    } catch (error) {
-                        console.error("Error deleting workflow instance:", error);
-                    }
-
-                    return {
-                        response: `${response} ${lowestLevelID} 'Workflow Triggered'`
-                    };
-                } else if (wf_status === 'Rejected') {
-                    const updatedApproverHistory = await db.run(
-                        UPDATE(ApproverHistory)
-                            .set({
-                                status: wf_status
-                                // comments: wf_comments
-                            })
-                            .where({ up__ID: wf_parentId, ID: wf_childId })
-                    );
-
-                    let deletePayload = [
-                        {
-                            id: wf_instanceID, // ID of the workflow instance to delete
-                            deleted: true           // Mark it for deletion
-                        }
-                    ];
-
-                    try {
-                        // Send the PATCH request
-                        let deleteResponse = await BPA_WORKFLOW.send('PATCH', '/', deletePayload);
-
-                        console.log("Workflow instance deleted successfully:", deleteResponse);
-                    } catch (error) {
-                        console.error("Error deleting workflow instance:", error);
-                    }
-
-                    const newStatus = "E0010";
-                    await statusChange(req, wf_parentId, newStatus);
-                    return {
-                        response: 'Workflow Triggered Rejected'
-                    };
-                }
-
-            } catch (error) {
-                return {
-                    response: `Status update failed: ${error.message}`
                 }
             }
         }

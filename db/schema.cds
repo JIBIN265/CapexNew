@@ -207,7 +207,7 @@ aspect CapexMain {
 
 entity StatusValues : cuid, managed, {
   key code           : String(5);
-      value          : String(20);
+      value          : String(25);
       criticality    : Integer default 0;
       deletePossible : Boolean default false;
       insertPossible : Boolean default false;

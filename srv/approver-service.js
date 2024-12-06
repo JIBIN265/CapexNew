@@ -233,11 +233,13 @@ class CapexApproverCatalogService extends cds.ApplicationService {
 
                     if (filteredApproverHistory.length > 0) {
                         const sortedApprovers = filteredApproverHistory.sort((a, b) => a.Level - b.Level);
-                        lowestLevelEmail = 'jibin.thomas@msitek.us';//currentRecord[0]?.attachments?.[0]?.email  
+                        lowestLevelEmail = sortedApprovers[0]?.email
                         lowestLevelID = sortedApprovers[0]?.ID;
                         lowestFolderID = currentRecord[0]?.attachments?.[0]?.folderId || null;
                         const baseURL = "https://yk2lt6xsylvfx4dz.launchpad.cfapps.us10.hana.ondemand.com/site/Kruger#zcapexapprover-manage?sap-ui-app-id-hint=saas_approuter_zcapexapprover&/Capex({documentID})?layout=TwoColumnsMidExpanded";
                         dynamicURL = baseURL.replace("{documentID}", currentRecord[0]?.ID);
+                        const userURL = "https://yk2lt6xsylvfx4dz.launchpad.cfapps.us10.hana.ondemand.com/site?siteId=4bf2f916-b150-4361-918c-8a51f5b9c835#zcapexcreator-manage?sap-ui-app-id-hint=saas_approuter_zcapexcreator&/Capex({documentID})?layout=TwoColumnsMidExpanded";
+                        const dyuserURL = userURL.replace("{documentID}", currentRecord[0]?.documentID);
                         if (wf_status === 'Approved') {
                             lowestName = currentRecord[0].to_ApproverHistory[0].approverName;
                         } else if (wf_status === 'Skipped') {
@@ -305,7 +307,11 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                             "url": dynamicURL ? String(dynamicURL) : "null",
                             "approverName": lowestName ? String(lowestName) : "null",
                             "initiator": req.user.id,
-                            "initiatorName": req.user.id
+                            "initiatorName": req.user.id,
+                            "userUrl": dyuserURL ? String(dynamicURL) : "null",
+                            "action": "Create",
+                            "decision": "",
+                            "appComments": ""
 
                         }
                     };
@@ -337,6 +343,11 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                     } catch (error) {
                         console.error("Error deleting workflow instance:", error);
                     }
+
+                    //for sending mail to initiator:
+                    testData.context.decision = Status; // Replace with your logic
+                    testData.context.appComments = wfComments;
+                    let responseMail = await BPA_WORKFLOW.send('POST', '/', testData);
 
                     return {
                         response: `${response} ${lowestLevelID} 'Workflow Triggered'`
@@ -478,7 +489,7 @@ class CapexApproverCatalogService extends cds.ApplicationService {
 
                     if (filteredApproverHistory.length > 0) {
                         const sortedApprovers = filteredApproverHistory.sort((a, b) => a.Level - b.Level);
-                        lowestLevelEmail = 'jibin.thomas@msitek.us';
+                        lowestLevelEmail = sortedApprovers[0]?.email;
                         lowestLevelID = sortedApprovers[0]?.ID;
                         lowestFolderID = currentRecord[0]?.attachments?.[0]?.folderId || null;
                         const baseURL = "https://yk2lt6xsylvfx4dz.launchpad.cfapps.us10.hana.ondemand.com/site/Kruger#zcapexapprover-manage?sap-ui-app-id-hint=saas_approuter_zcapexapprover&/Capex({documentID})?layout=TwoColumnsMidExpanded";
