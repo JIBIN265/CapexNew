@@ -380,7 +380,7 @@ class CapexCreatorCatalogService extends cds.ApplicationService {
                 req.data.to_ApproverHistory = sortedApprovers.map((approver, index) => ({
                     site: approver.Site,
                     level: approver.Level,
-                    email: approver.Email ? approver.Email.toLowerCase() : null,
+                    email: approver.Email,
                     status: index === 0 ? 'Pending' : 'Not initiated',
                     days: index === 0 ? '1' : null,
                     pendingDate: index === 0 ? new Date().toISOString() : null,
@@ -395,7 +395,7 @@ class CapexCreatorCatalogService extends cds.ApplicationService {
                     .where({ ID: req.data.ID });
 
 
-                currentApprover = sortedApprovers[0]?.Email
+                currentApprover = sortedApprovers[0]?.Email;
                 const updateMain = await UPDATE(Capex)
                     .set({
                         totalApprovals: req.data.to_ApproverHistory.length,
@@ -452,7 +452,7 @@ class CapexCreatorCatalogService extends cds.ApplicationService {
                         "approverName": lowestName ? String(lowestName) : "null",
                         "initiator": req.user.id,
                         "initiatorName": req.user.id,
-                        "userUrl": dyuserURL ? String(dynamicURL) : "null",
+                        "userUrl": dyuserURL ? String(dyuserURL) : "null",
                         "action": "Create",
                         "decision": "",
                         "appComments": ""
@@ -518,8 +518,8 @@ class CapexCreatorCatalogService extends cds.ApplicationService {
             delete copiedCapex.HasActiveEntity;
             delete copiedCapex.HasDraftEntity;
             delete copiedCapex.IsActiveEntity;
-            // copiedCapex.HasDraftEntity = true
 
+            delete copiedCapex.orderNumber;
             delete copiedCapex.millLabor;
             delete copiedCapex.maintenanceLabor;
             delete copiedCapex.operationsLabor;

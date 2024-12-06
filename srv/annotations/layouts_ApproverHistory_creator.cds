@@ -21,6 +21,11 @@ annotate service.ApproverHistory with @(
             $Type: 'UI.DataField',
             Value: days,
             Label: '{i18n>NumberOfDays}',
+        },
+        {
+            $Type: 'UI.DataField',
+            Value: approverName,
+            Label: '{i18n>ApproverName}',
         }
     ],
     UI.SelectionPresentationVariant #ApproverHistory: {

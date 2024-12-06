@@ -39,7 +39,7 @@ class CapexApproverCatalogService extends cds.ApplicationService {
 
             try {
                 // Add a filter to fetch only records created by the current user
-                req.query.where({ currentApprover: 'jibin.thomas@msitek.us' });
+                req.query.where({ currentApprover: 'jibin.thomas@msitek.us' });//req.user.id });
 
                 // Execute the query to check for records
                 const results = await cds.run(req.query);
@@ -219,6 +219,7 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                     let lowestLevelID;
                     let lowestFolderID;
                     let dynamicURL;
+                    let dyuserURL;
                     let lowestName;
                     let lowestApprover;
 
@@ -239,7 +240,7 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                         const baseURL = "https://yk2lt6xsylvfx4dz.launchpad.cfapps.us10.hana.ondemand.com/site/Kruger#zcapexapprover-manage?sap-ui-app-id-hint=saas_approuter_zcapexapprover&/Capex({documentID})?layout=TwoColumnsMidExpanded";
                         dynamicURL = baseURL.replace("{documentID}", currentRecord[0]?.ID);
                         const userURL = "https://yk2lt6xsylvfx4dz.launchpad.cfapps.us10.hana.ondemand.com/site?siteId=4bf2f916-b150-4361-918c-8a51f5b9c835#zcapexcreator-manage?sap-ui-app-id-hint=saas_approuter_zcapexcreator&/Capex({documentID})?layout=TwoColumnsMidExpanded";
-                        const dyuserURL = userURL.replace("{documentID}", currentRecord[0]?.documentID);
+                        dyuserURL = userURL.replace("{documentID}", currentRecord[0]?.documentID);
                         if (wf_status === 'Approved') {
                             lowestName = currentRecord[0].to_ApproverHistory[0].approverName;
                         } else if (wf_status === 'Skipped') {
@@ -270,6 +271,55 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                         }
 
                     } else {
+                        if (wf_status === 'Approved') {
+                            const newStatus = currentRecord[0].to_ApproverHistory[0].estat;//"E0010";
+                            await statusChange(req, wf_parentId, newStatus);
+                        }
+                        const userURL = "https://yk2lt6xsylvfx4dz.launchpad.cfapps.us10.hana.ondemand.com/site?siteId=4bf2f916-b150-4361-918c-8a51f5b9c835#zcapexcreator-manage?sap-ui-app-id-hint=saas_approuter_zcapexcreator&/Capex({documentID})?layout=TwoColumnsMidExpanded";
+                        dyuserURL = userURL.replace("{documentID}", currentRecord[0]?.documentID);
+                        let testData = {
+                            "definitionId": "us10.yk2lt6xsylvfx4dz.zcapexworkflow.triggerWorkflow",
+                            "context": {
+                                "orderNumber": currentRecord[0].orderNumber ? String(currentRecord[0].orderNumber) : "null",
+                                "orderType": currentRecord[0].orderType ? String(currentRecord[0].orderType) : "null",
+                                "companyCode": currentRecord[0].companyCode ? String(currentRecord[0].companyCode) : "null",
+                                "site": currentRecord[0].site ? String(currentRecord[0].site) : "null",
+                                "division": currentRecord[0].division ? String(currentRecord[0].division) : "null",
+                                "description": currentRecord[0].description ? String(currentRecord[0].description) : "null",
+                                "businessReasons": currentRecord[0].businessReason ? currentRecord[0].businessReason : "null",
+                                "amount": currentRecord[0].amount ? String(currentRecord[0].amount) : "null",
+                                "currency": currentRecord[0].currency_code ? currentRecord[0].currency_code : "null",
+                                "appropriationsCosts": [
+                                    {
+                                        "millLabor": currentRecord[0].millLabor ? String(currentRecord[0].millLabor) : "null",
+                                        "maintenanceLabor": currentRecord[0].maintenanceLabor ? String(currentRecord[0].maintenanceLabor) : "null",
+                                        "operationsLabor": currentRecord[0].operationsLabor ? String(currentRecord[0].operationsLabor) : "null",
+                                        "outsideContract": currentRecord[0].outsideContract ? String(currentRecord[0].outsideContract) : "null",
+                                        "materialCost": currentRecord[0].materialCost ? String(currentRecord[0].materialCost) : "null",
+                                        "hardwareCost": currentRecord[0].hardwareCost ? String(currentRecord[0].hardwareCost) : "null",
+                                        "softwareCost": currentRecord[0].softwareCost ? String(currentRecord[0].softwareCost) : "null",
+                                        "contingencyCost": currentRecord[0].contingencyCost ? String(currentRecord[0].contingencyCost) : "null",
+                                        "totalCost": currentRecord[0].totalCost ? String(currentRecord[0].totalCost) : "null"
+                                    }
+                                ],
+                                "approver": lowestLevelEmail,
+                                "_id": currentRecord[0].ID ? String(currentRecord[0].ID) : "null",
+                                "childId": lowestLevelID ? String(lowestLevelID) : "null",
+                                "folderId": lowestFolderID ? String(lowestFolderID) : "null",
+                                "url": dynamicURL ? String(dynamicURL) : "null",
+                                "approverName": lowestName ? String(lowestName) : "null",
+                                "initiator": currentRecord[0].createdBy ? String(currentRecord[0].createdBy) : "null",
+                                "initiatorName": currentRecord[0].createdBy ? String(currentRecord[0].createdBy) : "null",
+                                "userUrl": dyuserURL ? String(dyuserURL) : "null",
+                                "action": "Mail",
+                                "decision": Status,
+                                "appComments": wfComments
+
+                            }
+                        };
+                        let BPA_WORKFLOW1 = await cds.connect.to('BPA_WORKFLOW');
+                        let responseMail = await BPA_WORKFLOW1.send('POST', '/', testData);
+
                         return {
                             response: 'Workflow ended'
                         };
@@ -306,9 +356,9 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                             "folderId": lowestFolderID ? String(lowestFolderID) : "null",
                             "url": dynamicURL ? String(dynamicURL) : "null",
                             "approverName": lowestName ? String(lowestName) : "null",
-                            "initiator": req.user.id,
-                            "initiatorName": req.user.id,
-                            "userUrl": dyuserURL ? String(dynamicURL) : "null",
+                            "initiator": currentRecord[0].createdBy ? String(currentRecord[0].createdBy) : "null",
+                            "initiatorName": currentRecord[0].createdBy ? String(currentRecord[0].createdBy) : "null",
+                            "userUrl": dyuserURL ? String(dyuserURL) : "null",
                             "action": "Create",
                             "decision": "",
                             "appComments": ""
@@ -345,9 +395,12 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                     }
 
                     //for sending mail to initiator:
+                    testData.context.action = "Mail"
                     testData.context.decision = Status; // Replace with your logic
                     testData.context.appComments = wfComments;
                     let responseMail = await BPA_WORKFLOW.send('POST', '/', testData);
+
+
 
                     return {
                         response: `${response} ${lowestLevelID} 'Workflow Triggered'`
@@ -356,8 +409,7 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                     const updatedApproverHistory = await db.run(
                         UPDATE(ApproverHistory)
                             .set({
-                                status: wf_status,
-                                days: 0
+                                status: wf_status
                                 // comments: wf_comments
                             })
                             .where({ up__ID: wf_parentId, ID: wf_childId })
@@ -378,6 +430,51 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                     } catch (error) {
                         console.error("Error deleting workflow instance:", error);
                     }
+
+                    const userURL = "https://yk2lt6xsylvfx4dz.launchpad.cfapps.us10.hana.ondemand.com/site?siteId=4bf2f916-b150-4361-918c-8a51f5b9c835#zcapexcreator-manage?sap-ui-app-id-hint=saas_approuter_zcapexcreator&/Capex({documentID})?layout=TwoColumnsMidExpanded";
+                    dyuserURL = userURL.replace("{documentID}", currentRecord[0]?.documentID);
+                    let testData = {
+                        "definitionId": "us10.yk2lt6xsylvfx4dz.zcapexworkflow.triggerWorkflow",
+                        "context": {
+                            "orderNumber": currentRecord[0].orderNumber ? String(currentRecord[0].orderNumber) : "null",
+                            "orderType": currentRecord[0].orderType ? String(currentRecord[0].orderType) : "null",
+                            "companyCode": currentRecord[0].companyCode ? String(currentRecord[0].companyCode) : "null",
+                            "site": currentRecord[0].site ? String(currentRecord[0].site) : "null",
+                            "division": currentRecord[0].division ? String(currentRecord[0].division) : "null",
+                            "description": currentRecord[0].description ? String(currentRecord[0].description) : "null",
+                            "businessReasons": currentRecord[0].businessReason ? currentRecord[0].businessReason : "null",
+                            "amount": currentRecord[0].amount ? String(currentRecord[0].amount) : "null",
+                            "currency": currentRecord[0].currency_code ? currentRecord[0].currency_code : "null",
+                            "appropriationsCosts": [
+                                {
+                                    "millLabor": currentRecord[0].millLabor ? String(currentRecord[0].millLabor) : "null",
+                                    "maintenanceLabor": currentRecord[0].maintenanceLabor ? String(currentRecord[0].maintenanceLabor) : "null",
+                                    "operationsLabor": currentRecord[0].operationsLabor ? String(currentRecord[0].operationsLabor) : "null",
+                                    "outsideContract": currentRecord[0].outsideContract ? String(currentRecord[0].outsideContract) : "null",
+                                    "materialCost": currentRecord[0].materialCost ? String(currentRecord[0].materialCost) : "null",
+                                    "hardwareCost": currentRecord[0].hardwareCost ? String(currentRecord[0].hardwareCost) : "null",
+                                    "softwareCost": currentRecord[0].softwareCost ? String(currentRecord[0].softwareCost) : "null",
+                                    "contingencyCost": currentRecord[0].contingencyCost ? String(currentRecord[0].contingencyCost) : "null",
+                                    "totalCost": currentRecord[0].totalCost ? String(currentRecord[0].totalCost) : "null"
+                                }
+                            ],
+                            "approver": lowestLevelEmail,
+                            "_id": currentRecord[0].ID ? String(currentRecord[0].ID) : "null",
+                            "childId": lowestLevelID ? String(lowestLevelID) : "null",
+                            "folderId": lowestFolderID ? String(lowestFolderID) : "null",
+                            "url": dynamicURL ? String(dynamicURL) : "null",
+                            "approverName": lowestName ? String(lowestName) : "null",
+                            "initiator": currentRecord[0].createdBy ? String(currentRecord[0].createdBy) : "null",
+                            "initiatorName": currentRecord[0].createdBy ? String(currentRecord[0].createdBy) : "null",
+                            "userUrl": dyuserURL ? String(dyuserURL) : "null",
+                            "action": "Mail",
+                            "decision": Status,
+                            "appComments": wfComments
+
+                        }
+                    };
+                    let BPA_WORKFLOW1 = await cds.connect.to('BPA_WORKFLOW');
+                    let responseMail = await BPA_WORKFLOW1.send('POST', '/', testData);
 
                     const newStatus = "E0010";
                     await statusChange(req, wf_parentId, newStatus);
@@ -500,9 +597,8 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                             lowestName = sortedApprovers[0].approverName;
                         }
 
-                        const lowestApprover = 'jibin.thomas@msitek.us';//currentRecord[0]?.attachments?.[0]?.email
                         const updateMain = await UPDATE(Capex)
-                            .set({ currentApprover: lowestApprover })
+                            .set({ currentApprover: lowestLevelEmail })
                             .where({ ID: wf_parentId });
 
                         if (wf_status === 'Approved') {

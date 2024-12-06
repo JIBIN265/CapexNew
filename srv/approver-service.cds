@@ -11,7 +11,7 @@ service CapexApproverCatalogService @(path: 'approver') @(requires: 'authenticat
             @(Common.IsActionCritical: true)
             @(
                 cds.odata.bindingparameter.name: '_it',
-                Common.SideEffects             : {TargetEntities: ['$Return']}
+                Common.SideEffects             : {TargetEntities: ['$Return','in/to_ApproverHistory']}
             )
             action approve(in : $self)                                                                          returns Capex;
 
