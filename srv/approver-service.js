@@ -39,7 +39,7 @@ class CapexApproverCatalogService extends cds.ApplicationService {
 
             try {
                 // Add a filter to fetch only records created by the current user
-                req.query.where({ currentApprover: 'jibin.thomas@msitek.us' });//req.user.id });
+                req.query.where({ currentApprover: req.user.id });
 
                 // Execute the query to check for records
                 const results = await cds.run(req.query);
@@ -197,6 +197,14 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                     }
 
                 }
+                let dyuserURL;
+                let lowestLevelEmail;
+                let lowestLevelID;
+                let lowestFolderID;
+                let dynamicURL;
+                let lowestName;
+                let lowestApprover;
+
                 const wf_childId = currentRecord[0]?.to_ApproverHistory?.find(record => record.status === 'Pending')?.ID;
                 wf_instanceID = currentRecord[0]?.to_ApproverHistory?.find(record => record.status === 'Pending')?.instanceId;
                 if (wf_status === 'Approved' || wf_status === 'Skipped') {
@@ -214,14 +222,6 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                             })
                             .where({ up__ID: wf_parentId, ID: wf_childId })
                     );
-
-                    let lowestLevelEmail;
-                    let lowestLevelID;
-                    let lowestFolderID;
-                    let dynamicURL;
-                    let dyuserURL;
-                    let lowestName;
-                    let lowestApprover;
 
 
                     let filteredApproverHistory = (currentRecord[0] && currentRecord[0].to_ApproverHistory)
@@ -458,7 +458,7 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                                     "totalCost": currentRecord[0].totalCost ? String(currentRecord[0].totalCost) : "null"
                                 }
                             ],
-                            "approver": lowestLevelEmail,
+                            "approver": lowestLevelEmail ? String(lowestLevelEmail) : "null",
                             "_id": currentRecord[0].ID ? String(currentRecord[0].ID) : "null",
                             "childId": lowestLevelID ? String(lowestLevelID) : "null",
                             "folderId": lowestFolderID ? String(lowestFolderID) : "null",
@@ -538,6 +538,35 @@ class CapexApproverCatalogService extends cds.ApplicationService {
             const wf_status = req.data.status;
             const wf_comments = req.data.comments;
             try {
+
+                let lowestLevelEmail;
+                let lowestLevelID;
+                let lowestFolderID;
+                let dynamicURL;
+                let lowestName;
+                let dyuserURL;
+
+                const currentRecord = await db.run(
+                    SELECT.from(Capex)
+                        .columns(cpx => {
+                            cpx`*`,
+                                cpx.to_ApproverHistory(cfy => { cfy`*` }),
+                                cpx.attachments(atch => { atch`*` })
+                        })
+                        .where({ ID: wf_parentId })
+                );
+
+                if (wf_comments) {
+                    const newComment = {
+                        up__ID: wf_parentId,
+                        text: wf_comments
+                    };
+
+                    const insertedComment = await db.run(
+                        INSERT.into(Comments).entries(newComment)
+                    );
+                }
+
                 if (wf_status === 'Approved' || wf_status === 'Skipped') {
                     const updatedApproverHistory = await db.run(
                         UPDATE(ApproverHistory)
@@ -547,34 +576,6 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                             })
                             .where({ up__ID: wf_parentId, ID: wf_childId })
                     );
-
-                    if (wf_comments) {
-                        const newComment = {
-                            up__ID: wf_parentId,
-                            text: wf_comments
-                        };
-
-                        const insertedComment = await db.run(
-                            INSERT.into(Comments).entries(newComment)
-                        );
-                    }
-
-
-                    const currentRecord = await db.run(
-                        SELECT.from(Capex)
-                            .columns(cpx => {
-                                cpx`*`,
-                                    cpx.to_ApproverHistory(cfy => { cfy`*` }),
-                                    cpx.attachments(atch => { atch`*` })
-                            })
-                            .where({ ID: wf_parentId })
-                    );
-
-                    let lowestLevelEmail;
-                    let lowestLevelID;
-                    let lowestFolderID;
-                    let dynamicURL;
-                    let lowestName;
 
                     let filteredApproverHistory = (currentRecord[0] && currentRecord[0].to_ApproverHistory)
                         ? currentRecord[0].to_ApproverHistory.filter(history => history.status === 'Not initiated')
@@ -591,6 +592,8 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                         lowestFolderID = currentRecord[0]?.attachments?.[0]?.folderId || null;
                         const baseURL = "https://yk2lt6xsylvfx4dz.launchpad.cfapps.us10.hana.ondemand.com/site/Kruger#zcapexapprover-manage?sap-ui-app-id-hint=saas_approuter_zcapexapprover&/Capex({documentID})?layout=TwoColumnsMidExpanded";
                         dynamicURL = baseURL.replace("{documentID}", currentRecord[0]?.ID);
+                        const userURL = "https://yk2lt6xsylvfx4dz.launchpad.cfapps.us10.hana.ondemand.com/site?siteId=4bf2f916-b150-4361-918c-8a51f5b9c835#zcapexcreator-manage?sap-ui-app-id-hint=saas_approuter_zcapexcreator&/Capex({documentID})?layout=TwoColumnsMidExpanded";
+                        dyuserURL = userURL.replace("{documentID}", currentRecord[0]?.documentID);
                         if (wf_status === 'Approved') {
                             lowestName = currentRecord[0].to_ApproverHistory[0].approverName;
                         } else if (wf_status === 'Skipped') {
@@ -618,6 +621,11 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                         );
 
                     } else {
+                        if (wf_status === 'Approved') {
+                            const newStatus = currentRecord[0].to_ApproverHistory[0].estat;//"E0010";
+                            await statusChange(req, wf_parentId, newStatus);
+                        }
+                        
                         return {
                             response: 'Workflow ended'
                         };
@@ -654,8 +662,12 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                             "folderId": lowestFolderID ? String(lowestFolderID) : "null",
                             "url": dynamicURL ? String(dynamicURL) : "null",
                             "approverName": lowestName ? String(lowestName) : "null",
-                            "initiator": req.user.id,
-                            "initiatorName": req.user.id
+                            "initiator": currentRecord[0].createdBy ? String(currentRecord[0].createdBy) : "null",
+                            "initiatorName": currentRecord[0].createdBy ? String(currentRecord[0].createdBy) : "null",
+                            "userUrl": dyuserURL ? String(dyuserURL) : "null",
+                            "action": "Create",
+                            "decision": "",
+                            "appComments": ""
                         }
                     };
 
@@ -683,6 +695,7 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                             })
                             .where({ up__ID: wf_parentId, ID: wf_childId })
                     );
+
                     const newStatus = "E0010";
                     await statusChange(req, wf_parentId, newStatus);
                     return {

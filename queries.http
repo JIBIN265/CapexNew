@@ -1,0 +1,9 @@
+###
+POST http://localhost:4004/odata/v4/approver/Capex(ID='5754a1da-349c-4991-a910-9d5331f86341',IsActiveEntity=true)/CapexApproverCatalogService.workflow
+Content-Type: application/json
+
+{
+    "status": "Skipped",
+    "childId": "a2b3e71f-df16-49c3-b9de-44edb3128554",
+    "comments": "2nd level"
+}

@@ -7,13 +7,19 @@ service CapexApproverCatalogService @(path: 'approver') @(requires: 'authenticat
 
     entity Capex                 as projection on persistence.CapexEntity
         actions {
-            action validate(text : String  @Common.Label:'Reason for Skip?'  @UI.MultiLineText:true  )                                                                                   returns Capex;
+            action validate(text : String  @Common.Label:'Reason for Skip?'  @UI.MultiLineText:true  )           returns Capex;
             @(Common.IsActionCritical: true)
             @(
                 cds.odata.bindingparameter.name: '_it',
-                Common.SideEffects             : {TargetEntities: ['$Return','in/to_ApproverHistory']}
+                Common.SideEffects             : {
+                    TargetProperties: ['in/to_ApproverHistory/status']}
+                    // TargetEntities: [
+                    // '$Return',
+                    // 'in/to_ApproverHistory',
+                    // 'in/to_Comments']
+                
             )
-            action approve(in : $self)                                                                          returns Capex;
+            action approve(in : $self)                                                                           returns Capex;
 
             @(
                 cds.odata.bindingparameter.name: '_it',
@@ -32,22 +38,22 @@ service CapexApproverCatalogService @(path: 'approver') @(requires: 'authenticat
                 cds.odata.bindingparameter.name: '_it',
                 Common.SideEffects             : {TargetEntities: ['_it']}
             )
-            action workflowApprove()                                                                            returns {
+            action workflowApprove()                                                                             returns {
                 status : String(10);
                 orderNumber : String(12);
             };
 
-            action workflowIncomplete()                                                                         returns {
+            action workflowIncomplete()                                                                          returns {
                 status : String(10);
                 orderNumber : String(12);
             };
 
-            action workflowFinal()                                                                              returns {
+            action workflowFinal()                                                                               returns {
                 status : String(10);
                 orderNumber : String(12);
             };
 
-            action workflow(status : String(15), childId : String(40), comments : String(1000))                 returns {
+            action workflow(status : String(15), childId : String(40), comments : String(1000))                  returns {
                 response : String(10);
             };
 
