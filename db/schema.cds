@@ -16,6 +16,15 @@ using {
 } from './common';
 using {Attachments} from '@cap-js/sdm';
 
+// type sapmessage : {
+//   code            : String(10) not null default '400';
+//   message         : String(100) default 'test';
+//   numericSeverity : Integer default 2;
+//   transition      : Boolean default true;
+//   target          : String(200) not null default 'in attachments';
+//   longtextUrl     : String(200) not null default 'test';
+// };
+
 type messageImport {
   @description: 'Notes'
   notes : String(1000) default '';
@@ -206,14 +215,12 @@ entity StatusValues : cuid, managed, {
 }
 
 entity CapexEntity : cuid, managed, CapexMain, DocumentId, messageImport {
+
   approvedCount       : Integer @Core.Computed;
   totalApprovals      : Integer @Core.Computed;
 
   @description: 'Current Approver'
   currentApprover     : User;
-
-  // createEnabled       : Boolean default true; //In true action disables
-  // approveEnabled      : Boolean default false;
 
   @description: 'Cash Flow Year Composition'
   to_CashFlowYear     : Composition of many CashFlowYear;
@@ -353,3 +360,8 @@ entity Sustainability2030 : cuid, managed {
   @description: 'Amount'
   amount          : String(50); // ZZOTAMOUN3
 }
+
+
+// extend Attachments with {
+//   SAP_Message : many sapmessage;
+// }

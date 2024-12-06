@@ -36,83 +36,75 @@ class CapexApproverCatalogService extends cds.ApplicationService {
             });
 
         this.before('READ', Capex, async (req) => {
+
             try {
+                // Add a filter to fetch only records created by the current user
+                req.query.where({ currentApprover: 'jibin.thomas@msitek.us' });
+
+                // Execute the query to check for records
+                const results = await cds.run(req.query);
+
+            } catch (error) {
+                // Handle errors gracefully
+                req.reject(500, `An error occurred: ${error.message}`);
+            }
+
+        });
 
 
-                try {
-                    // Add a filter to fetch only records created by the current user
-                    req.query.where({ currentApprover: req.user.id });
+        this.before('DELETE', Capex, async (req) => {
+            debugger;
+            const currentRecord = await db.run(
+                SELECT.from(Capex)
+                    .columns(cpx => {
+                        cpx`*`
+                    })
+                    .where({ ID: req.data.ID })
+            );
+            if (currentRecord[0].createdBy !== req.user.id) {
+                req.error(400, 'You are not Allowed to delete the Order');
+                return;
+            }
+        });
 
-                    // Execute the query to check for records
-                    const results = await cds.run(req.query);
+        this.before('READ', ApproverHistory, async (req) => {
 
-                } catch (error) {
-                    // Handle errors gracefully
-                    req.reject(500, `An error occurred: ${error.message}`);
-                }
+            try {
                 const allRecords = await db.run(
                     SELECT.from(Capex)
                         .columns(cpx => {
                             cpx`*`,
                                 cpx.to_ApproverHistory(cfy => { cfy`*` });
                         })
+                        .where({
+                            ID: req.data.up__ID
+                        })
                 );
 
+
                 for (let capex of allRecords) {
-                    // Calculate the total number of approvals and count of approved statuses
-                    capex.totalApprovals = capex.to_ApproverHistory.length;
-                    capex.approvedCount = capex.to_ApproverHistory.filter(history => history.status === 'Approved').length;
 
                     // Update each `to_ApproverHistory` record's `days` field if status is "Pending"
                     for (let history of capex.to_ApproverHistory) {
                         if (history.status === 'Pending' && history.pendingDate) {
-                            const pendingDate = new Date(history.pendingDate);
-                            const today = new Date();
-                            const diffTime = today - pendingDate;
-                            history.days = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); // Calculate days difference
-                            capex.currentApprover = 'jibin.thomas@msitek.us';//history.email;
-                        } else {
-                            history.days = null; // Clear days if not pending
-                            capex.currentApprover = null;
+                            const days = Math.ceil((new Date() - new Date(history.pendingDate)) / (1000 * 60 * 60 * 24));
+                            if (days && history.days !== days) {
+                                history.days = days; // Update only if different
+                                let updateHistory = await db.run(
+                                    UPDATE(ApproverHistory)
+                                        .set({ days: days.toString() })
+                                        .where({ up__ID: req.data.up__ID, ID: history.ID }))
+                            }
+
                         }
                     }
                 }
-
-                // Perform batch updates
-                await Promise.all([
-                    // Update Capex records
-                    ...allRecords.map(capex =>
-                        db.run(
-                            UPDATE(Capex)
-                                .set({
-                                    totalApprovals: capex.totalApprovals,
-                                    approvedCount: capex.approvedCount,
-                                    currentApprover: capex.currentApprover,
-                                })
-                                .where({ ID: capex.ID })
-                        )
-                    ),
-                    // Update ApproverHistory records with non-null days only
-                    ...allRecords.flatMap(capex =>
-                        capex.to_ApproverHistory
-                            .filter(history => history.days !== null) // Only update if days is calculated
-                            .map(history =>
-                                db.run(
-                                    UPDATE(ApproverHistory)
-                                        .set({ days: String(history.days) }) // Convert days to string to avoid type errors
-                                        .where({ ID: history.ID })
-                                )
-                            )
-                    )
-                ]);
 
             } catch (error) {
                 console.error('Error during synchronization:', error);
                 return req.error(500, error.message);
             }
-
         });
-
 
         async function statusChange(req, ID, newStatus) {
             try {
@@ -208,11 +200,17 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                 const wf_childId = currentRecord[0]?.to_ApproverHistory?.find(record => record.status === 'Pending')?.ID;
                 wf_instanceID = currentRecord[0]?.to_ApproverHistory?.find(record => record.status === 'Pending')?.instanceId;
                 if (wf_status === 'Approved' || wf_status === 'Skipped') {
+                    let count;
+                    if (wf_status === 'Approved') {
+                        count = currentRecord[0].approvedCount + 1;
+                    } else if (wf_status === 'Skipped') {
+                        count = currentRecord[0].approvedCount;
+
+                    }
                     const updatedApproverHistory = await db.run(
                         UPDATE(ApproverHistory)
                             .set({
                                 status: wf_status
-                                // comments: wf_comments
                             })
                             .where({ up__ID: wf_parentId, ID: wf_childId })
                     );
@@ -238,14 +236,22 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                         lowestLevelEmail = 'jibin.thomas@msitek.us';//currentRecord[0]?.attachments?.[0]?.email  
                         lowestLevelID = sortedApprovers[0]?.ID;
                         lowestFolderID = currentRecord[0]?.attachments?.[0]?.folderId || null;
-                        const baseURL = "https://yk2lt6xsylvfx4dz.launchpad.cfapps.us10.hana.ondemand.com/site/Kruger#zcapexapprover-manage?sap-ui-app-id-hint=saas_approuter_capex&/Capex({documentID})?layout=TwoColumnsMidExpanded";
-                        dynamicURL = baseURL.replace("{documentID}", currentRecord[0]?.documentID);
+                        const baseURL = "https://yk2lt6xsylvfx4dz.launchpad.cfapps.us10.hana.ondemand.com/site/Kruger#zcapexapprover-manage?sap-ui-app-id-hint=saas_approuter_zcapexapprover&/Capex({documentID})?layout=TwoColumnsMidExpanded";
+                        dynamicURL = baseURL.replace("{documentID}", currentRecord[0]?.ID);
                         if (wf_status === 'Approved') {
                             lowestName = currentRecord[0].to_ApproverHistory[0].approverName;
                         } else if (wf_status === 'Skipped') {
                             lowestName = sortedApprovers[0].approverName;
                             wf_instanceID = sortedApprovers[0].instanceId;
                         }
+
+                        let updateParent = await db.run(
+                            UPDATE(Capex)
+                                .set({
+                                    approvedCount: count,
+                                    currentApprover: lowestLevelEmail
+                                })
+                                .where({ ID: wf_parentId }))
 
                         const updatedApproverHistory1 = await db.run(
                             UPDATE(ApproverHistory)
@@ -339,7 +345,8 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                     const updatedApproverHistory = await db.run(
                         UPDATE(ApproverHistory)
                             .set({
-                                status: wf_status
+                                status: wf_status,
+                                days: 0
                                 // comments: wf_comments
                             })
                             .where({ up__ID: wf_parentId, ID: wf_childId })
@@ -375,15 +382,15 @@ class CapexApproverCatalogService extends cds.ApplicationService {
             }
         }
 
-        this.on("validate", async req => {
-            const Comments = req.data.text
-            if (!Comments || Comments.trim() === '') {
-                req.error(400, 'The "Reason for Skipping" field is mandatory.');
-                return;
-            }
-            const Status = 'Skipped';
-            await approveChange(req, Status, Comments);
+
+        this.on("approve", async (req) => {
+            // const { ID } = req.params[0];
+            const Status = 'Approved';
+            await approveChange(req, Status);
+            // const newStatus = "E0009";
+            // await statusChange(req, ID, newStatus);
         });
+
 
         this.on("rejectFinal2", async req => {
             const Comments = req.data.text;
@@ -395,6 +402,17 @@ class CapexApproverCatalogService extends cds.ApplicationService {
             await approveChange(req, Status, Comments);
         });
 
+        this.on("validate", async req => {
+            const Comments = req.data.text
+            if (!Comments || Comments.trim() === '') {
+                req.error(400, 'The "Reason for Skipping" field is mandatory.');
+                return;
+            }
+            const Status = 'Skipped';
+            await approveChange(req, Status, Comments);
+        });
+
+
         this.on("rejectIncomplete", async (req) => {
             if (!Comments || Comments.trim() === '') {
                 req.error(400, 'The "Reason for Rework" field is mandatory.');
@@ -405,13 +423,6 @@ class CapexApproverCatalogService extends cds.ApplicationService {
             await approveChange(req, Status, Comments);
         });
 
-        this.on("approve", async (req) => {
-            // const { ID } = req.params[0];
-            const Status = 'Approved';
-            await approveChange(req, Status);
-            // const newStatus = "E0009";
-            // await statusChange(req, ID, newStatus);
-        });
 
         this.on("workflow", async (req) => {
             const wf_parentId = req.params[0].ID;
@@ -470,8 +481,8 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                         lowestLevelEmail = 'jibin.thomas@msitek.us';
                         lowestLevelID = sortedApprovers[0]?.ID;
                         lowestFolderID = currentRecord[0]?.attachments?.[0]?.folderId || null;
-                        const baseURL = "https://yk2lt6xsylvfx4dz.launchpad.cfapps.us10.hana.ondemand.com/site/Kruger#zcapexapprover-manage?sap-ui-app-id-hint=saas_approuter_capex&/Capex({documentID})?layout=TwoColumnsMidExpanded";
-                        dynamicURL = baseURL.replace("{documentID}", currentRecord[0]?.documentID);
+                        const baseURL = "https://yk2lt6xsylvfx4dz.launchpad.cfapps.us10.hana.ondemand.com/site/Kruger#zcapexapprover-manage?sap-ui-app-id-hint=saas_approuter_zcapexapprover&/Capex({documentID})?layout=TwoColumnsMidExpanded";
+                        dynamicURL = baseURL.replace("{documentID}", currentRecord[0]?.ID);
                         if (wf_status === 'Approved') {
                             lowestName = currentRecord[0].to_ApproverHistory[0].approverName;
                         } else if (wf_status === 'Skipped') {

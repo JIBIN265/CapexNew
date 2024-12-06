@@ -10,6 +10,8 @@ using from '../srv/annotations/layouts_to_Comments';
 using from '../srv/annotations/layouts_to_Notes';
 using from '../srv/annotations/layouts_to_Objectives';
 using from '../srv/annotations/value-help';
+using from '../srv/annotations/side-effects';
+using from '../srv/cat-service';
 
 using from '../srv/annotations/capabilities_approver';
 using from '../srv/annotations/field-control_approver';
@@ -23,6 +25,8 @@ using from '../srv/annotations/layouts_to_Comments_approver';
 using from '../srv/annotations/layouts_to_Notes_approver';
 using from '../srv/annotations/layouts_to_Objectives_approver';
 using from '../srv/annotations/value-help_approver';
+using from '../srv/annotations/side-effects_approver';
+using from '../srv/approver-service';
 
 using from '../srv/annotations/capabilities_creator';
 using from '../srv/annotations/field-control_creator';
@@ -36,5 +40,7 @@ using from '../srv/annotations/layouts_to_Comments_creator';
 using from '../srv/annotations/layouts_to_Notes_creator';
 using from '../srv/annotations/layouts_to_Objectives_creator';
 using from '../srv/annotations/value-help_creator';
+using from '../srv/annotations/side-effects_creator';
+using from '../srv/creator-service';
 
 

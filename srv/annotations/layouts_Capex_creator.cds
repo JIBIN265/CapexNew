@@ -92,6 +92,7 @@ annotate service.Capex with @(
             Label : '{i18n>ApproverHistory}',
             ID    : 'ApproverHistory',
             Target: 'to_ApproverHistory/@UI.SelectionPresentationVariant#ApproverHistory',
+            ![@UI.PartOfPreview] : false
         },
     ],
     UI.Identification : [
@@ -118,7 +119,7 @@ annotate service.Capex with @(
             {
                 $Type            : 'UI.DataFieldForAnnotation',
                 Label            : '{i18n>progressIndicator}',
-                Target           : '@UI.DataPoint#progressIndicator',
+                Target           : '@UI.DataPoint#progressIndicator2',
                 ![@UI.Importance]: #Low,
             },
             {
@@ -432,6 +433,7 @@ annotate service.Capex with @(
         Visualization: #Progress,
         // Title        : '{i18n>progressIndicator}',
         Criticality  : 3,
+        CriticalityRepresentation : #WithoutIcon
     },
     UI.DataPoint #progressIndicator2    : {
         //Search-Term: #ProgressIndicator

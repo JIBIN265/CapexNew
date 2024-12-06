@@ -88,10 +88,11 @@ annotate service.Capex with @(
             Target: 'to_Objectives/@UI.LineItem#Objectives',
         },
         {
-            $Type : 'UI.ReferenceFacet',
-            Label : '{i18n>ApproverHistory}',
-            ID    : 'ApproverHistory',
-            Target: 'to_ApproverHistory/@UI.SelectionPresentationVariant#ApproverHistory',
+            $Type               : 'UI.ReferenceFacet',
+            Label               : '{i18n>ApproverHistory}',
+            ID                  : 'ApproverHistory',
+            Target              : 'to_ApproverHistory/@UI.SelectionPresentationVariant#ApproverHistory',
+            ![@UI.PartOfPreview]: false
         },
     ],
     UI.Identification : [
@@ -134,7 +135,7 @@ annotate service.Capex with @(
             {
                 $Type            : 'UI.DataFieldForAnnotation',
                 Label            : '{i18n>progressIndicator}',
-                Target           : '@UI.DataPoint#progressIndicator',
+                Target           : '@UI.DataPoint#progressIndicator2',
                 ![@UI.Importance]: #Low,
             },
             {

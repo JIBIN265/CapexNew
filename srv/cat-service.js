@@ -36,186 +36,90 @@ class CapexCatalogService extends cds.ApplicationService {
             });
 
         this.before('READ', Capex, async (req) => {
+
             try {
-
-                // const masterData = await ecc.tx(req).run(SELECT.from('MasterDataSet'));
-                // if (!masterData) {
-                //     return req.error(500, 'ECC Server could not be reached');
-                // }
-                // await Promise.all(masterData.map(async (item) => {
-                //     const existingRecord = await db.run(
-                //         SELECT.from(Capex).where({ orderNumber: item.orderNumber })
-                //     );
-
-                //     if (existingRecord.length === 0) {
-                //         // If the record doesn't exist, insert it
-                //         console.log(`Inserting new record with orderNumber: ${item.orderNumber}`);
-                //         const documentID = new SequenceHelper({
-                //             db: db,
-                //             sequence: "ZCAPEX_DOCUMENT_ID",
-                //             table: "zcapex_CapexEntity",
-                //             field: "documentID",
-                //         });
-
-                //         let number = await documentID.getNextNumber();
-                //         const insertStmt = INSERT.into(Capex).entries({
-                //             documentID: number.toString(),
-                //             orderNumber: item.orderNumber,
-                //             orderType: item.orderType,
-                //             companyCode: item.companyCode,
-                //             site: item.site,
-                //             division: item.division,
-                //             description: item.description,
-                //             businessReason: item.businessReason,
-                //             currency_code: item.currency,
-                //             appropriationLife: item.appropriationLife,
-                //             downtime: item.downtime,
-                //             amount: item.amount,
-                //             millLabor: item.millLabor,
-                //             maintenanceLabor: item.maintenanceLabor,
-                //             operationsLabor: item.operationsLabor,
-                //             outsideContract: item.outsideContract,
-                //             materialCost: item.materialCost,
-                //             hardwareCost: item.hardwareCost,
-                //             softwareCost: item.softwareCost,
-                //             contingencyCost: item.contingencyCost,
-                //             totalCost: item.totalCost,
-                //             profitImprovementPct: item.profitImprovementPct,
-                //             profitImprovementNPV: item.profitImprovementNPV,
-                //             paybackWithTaxes: item.paybackWithTaxes,
-                //             paybackWithoutTaxes: item.paybackWithoutTaxes,
-                //             oneTimeExpenses: item.oneTimeExpenses,
-                //             recurringExpenses: item.recurringExpenses,
-                //             startupDate: item.startupDate,
-                //             strategic: item.strategic,
-                //             businessSustaining: item.businessSustaining,
-                //             mandatory: item.mandatory,
-                //             profitImprovement: item.profitImprovement,
-                //             environmentalImpacts: item.environmentalImpacts,
-                //             safetyImplications: item.safetyImplications,
-                //             creditPotential: item.creditPotential,
-                //             insuranceApproval: item.insuranceApproval,
-                //             businessArea: item.businessArea,
-                //             controllingArea: item.controllingArea,
-                //             status: item.status,
-                //             stonr: item.stonr
-                //         });
-                //         await db.run(insertStmt);
-                //     } else {
-                //         // If the record exists, we do nothing
-                //         console.log(`Record with orderNumber: ${item.orderNumber} already exists. Skipping.`);
-                //     }
-                // }));
-                // console.log('Synchronization with ECC completed successfully');
-
-                // let userRoles;
-                // let createValue;
-                // let approveValue;
-                // try {
-                // Fetch only matching approvers
-                //     userRoles = await ecc.tx(req).run(
-                //         SELECT.from('UserRolesSet').where({
-                //             Email: 'JIBIN.THOMAS@KRUGER.COM'.toString()
-                //         })
-                //     );
-
-                //     if (userRoles[0]?.Create === 'X') {
-                //         createValue = true;
-                //         approveValue = false;
-                //     }
-                //     else if (userRoles[0]?.Approve === 'X') {
-                //         createValue = false;
-                //         approveValue = true;
-                //     }
-
-                // } catch (error) {
-                //     console.error('Error fetching or processing user roles:', error);
-                // }
-
-                // req.query.where({ createdBy: req.user.id });
-
-                let currentApprover;
                 const allRecords = await db.run(
                     SELECT.from(Capex)
                         .columns(cpx => {
                             cpx`*`,
                                 cpx.to_ApproverHistory(cfy => { cfy`*` });
                         })
+                        .where({
+                            ID: req.data.up__ID
+                        })
                 );
 
-                const filteredRecords = allRecords
-                    .map(record => ({
-                        ...record,
-                        to_ApproverHistory: record.to_ApproverHistory.filter(filter => filter.email === 'JOHN.GRANGE@KRUGERPRODUCTS.CA')
-                    }))
-                    .filter(record => record.to_ApproverHistory.length > 0);
-                // filteredRecord = allRecords[0].to_ApproverHistory.filter(filter => filter.email === 'JOHN.GRANGE@KRUGERPRODUCTS.CA');
 
                 for (let capex of allRecords) {
-                    // Calculate the total number of approvals and count of approved statuses
-                    capex.totalApprovals = capex.to_ApproverHistory.length;
-                    capex.approvedCount = capex.to_ApproverHistory.filter(history => history.status === 'Approved').length;
 
                     // Update each `to_ApproverHistory` record's `days` field if status is "Pending"
                     for (let history of capex.to_ApproverHistory) {
                         if (history.status === 'Pending' && history.pendingDate) {
-                            const pendingDate = new Date(history.pendingDate);
-                            const today = new Date();
-                            const diffTime = today - pendingDate;
-                            history.days = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); // Calculate days difference
-                            currentApprover = 'jibin.thomas@msitek.us';//history.email;
-                        } else {
-                            history.days = null; // Clear days if not pending
-                            currentApprover = null;
+                            const days = Math.ceil((new Date() - new Date(history.pendingDate)) / (1000 * 60 * 60 * 24));
+                            if (days && history.days !== days) {
+                                history.days = days; // Update only if different
+                                let updateHistory = await db.run(
+                                    UPDATE(ApproverHistory)
+                                        .set({ days: days.toString() })
+                                        .where({ up__ID: req.data.up__ID, ID: history.ID }))
+                            }
+
                         }
                     }
                 }
-
-                // Perform batch updates
-                await Promise.all([
-                    // Update Capex records
-                    ...allRecords.map(capex =>
-                        db.run(
-                            UPDATE(Capex)
-                                .set({
-                                    totalApprovals: capex.totalApprovals,
-                                    approvedCount: capex.approvedCount,
-                                    currentApprover: currentApprover,
-                                    // createEnabled: createValue,
-                                    // approveEnabled: approveValue
-                                })
-                                .where({ ID: capex.ID })
-                        )
-                    ),
-                    // Update ApproverHistory records with non-null days only
-                    ...allRecords.flatMap(capex =>
-                        capex.to_ApproverHistory
-                            .filter(history => history.days !== null) // Only update if days is calculated
-                            .map(history =>
-                                db.run(
-                                    UPDATE(ApproverHistory)
-                                        .set({ days: String(history.days) }) // Convert days to string to avoid type errors
-                                        .where({ ID: history.ID })
-                                )
-                            )
-                    )
-                ]);
 
             } catch (error) {
                 console.error('Error during synchronization:', error);
                 return req.error(500, error.message);
             }
-
         });
 
+        this.before('READ', ApproverHistory, async (req) => {
 
+            try {
+                const allRecords = await db.run(
+                    SELECT.from(Capex)
+                        .columns(cpx => {
+                            cpx`*`,
+                                cpx.to_ApproverHistory(cfy => { cfy`*` });
+                        })
+                        .where({
+                            ID: req.data.up__ID
+                        })
+                );
+
+
+                for (let capex of allRecords) {
+
+                    // Update each `to_ApproverHistory` record's `days` field if status is "Pending"
+                    for (let history of capex.to_ApproverHistory) {
+                        if (history.status === 'Pending' && history.pendingDate) {
+                            const days = Math.ceil((new Date() - new Date(history.pendingDate)) / (1000 * 60 * 60 * 24));
+                            if (days && history.days !== days) {
+                                history.days = days; // Update only if different
+                                let updateHistory = await db.run(
+                                    UPDATE(ApproverHistory)
+                                        .set({ days: days.toString() })
+                                        .where({ up__ID: req.data.up__ID, ID: history.ID }))
+                            }
+
+                        }
+                    }
+                }
+
+            } catch (error) {
+                console.error('Error during synchronization:', error);
+                return req.error(500, error.message);
+            }
+        });
 
         this.before("NEW", Capex.drafts, async (req) => {
 
-            if (req.target.name !== "CapexCatalogService.Capex.drafts") { return; }
+            if (req.target.name !== "CapexCreatorCatalogService.Capex.drafts") { return; }
             const { ID } = req.data;
-            req.data.status = process.env.DRAFTSTATUS;
-            if (!req.data.companyCode) { req.data.companyCode = process.env.COMPANYCODE; }
+            req.data.status = 'D';//process.env.DRAFTSTATUS;
+            req.data.currency_code = 'CAD';
+            if (!req.data.companyCode) { req.data.companyCode = '2000'; }//process.env.COMPANYCODE; }
 
             const documentID = new SequenceHelper({
                 db: db,
@@ -230,6 +134,8 @@ class CapexCatalogService extends cds.ApplicationService {
                 const records = await db.run(SELECT.from(Sustainability2030));
                 req.data.to_Objectives = records;
             }
+            req.data.totalApprovals = 0;
+            req.data.approvedCount = 0;
         });
 
 
@@ -292,7 +198,7 @@ class CapexCatalogService extends cds.ApplicationService {
             try {
 
                 const { text } = await db.run(SELECT.one.from(Comments)
-                        .columns(['text']).where({ up__ID: Key }));
+                    .columns(['text']).where({ up__ID: Key }));
                 const messageImport = {
                     notes: text
                 }
@@ -549,7 +455,7 @@ class CapexCatalogService extends cds.ApplicationService {
                     pendingDate: index === 0 ? new Date().toISOString() : null,
                     approverName: approver.Name,
                     estat: approver.Estat,
-                    zappLevel: approver.InternalLevel
+                    zappLevel: approver.InternalLevel,
                 }));
 
                 // Explicitly update the entity if needed
@@ -560,7 +466,11 @@ class CapexCatalogService extends cds.ApplicationService {
 
                 currentApprover = 'jibin.thomas@msitek.us';  ///sortedApprovers[0]?.Email
                 const updateMain = await UPDATE(Capex)
-                    .set({ currentApprover: currentApprover })
+                    .set({
+                        totalApprovals: req.data.to_ApproverHistory.length,
+                        approvedCount: 0,
+                        currentApprover: currentApprover
+                    })
                     .where({ ID: req.data.ID });
 
                 const currentAppHis = await db.run(
@@ -571,7 +481,7 @@ class CapexCatalogService extends cds.ApplicationService {
                 const lowestLevelEmail = 'jibin.thomas@msitek.us';//sortedApprovers[0]?.Email;
                 const lowestLevelID = currentAppHis[0].ID;
                 const lowestFolderID = req.data.attachments[0]?.folderId;
-                const baseURL = "https://yk2lt6xsylvfx4dz.launchpad.cfapps.us10.hana.ondemand.com/site/Kruger#Zcapex-manage?sap-ui-app-id-hint=saas_approuter_capex&/Capex({documentID})?layout=TwoColumnsMidExpanded";
+                const baseURL = "https://yk2lt6xsylvfx4dz.launchpad.cfapps.us10.hana.ondemand.com/site/Kruger#zcapexapprover-manage?sap-ui-app-id-hint=saas_approuter_capex&/Capex({documentID})?layout=TwoColumnsMidExpanded";
                 const dynamicURL = baseURL.replace("{documentID}", req.data.documentID);
                 const lowestName = currentAppHis[0].approverName;
 

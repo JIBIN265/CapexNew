@@ -47,15 +47,14 @@ annotate service.Capex with @(
 
 annotate service.ApproverHistory with @(
     //Disables the delete option dependent of the fields value
-    Capabilities.DeleteRestrictions: {Deletable: false, 
-    },
+    Capabilities.DeleteRestrictions: {Deletable: false, },
     UI.DeleteHidden                : true,
-    
-    UI.UpdateHidden                : true, 
-
+    UI.UpdateHidden                : true,
     UI.CreateHidden                : true,
 
 );
+
+// annotate service.Capex.attachments with @Common.Messages: SAP_Message;
 
 annotate service.Capex with @(Capabilities: {
     FilterRestrictions: {FilterExpressionRestrictions: [
