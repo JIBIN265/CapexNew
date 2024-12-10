@@ -1,7 +1,7 @@
 _schema-version: 3.3.0
 ID: zcapex
 description: Kruger Capital Expenditure Approval Process
-version: 1.0.35
+version: 1.0.2
 modules:
 - name: zcapex-srv
   type: nodejs

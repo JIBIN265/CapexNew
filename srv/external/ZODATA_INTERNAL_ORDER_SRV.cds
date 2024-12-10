@@ -1,4 +1,4 @@
-/* checksum : 563a1ed20a8c002f58b661e5de8f2e5c */
+/* checksum : 2cf4d14338fdd8957927b4a22d2975fe */
 @cds.external : true
 @m.IsDefaultEntityContainer : 'true'
 @sap.supported.formats : 'atom json xlsx'
@@ -419,6 +419,13 @@ entity ZODATA_INTERNAL_ORDER_SRV.MasterDataSet {
   @sap.sortable : 'false'
   @sap.filterable : 'false'
   stonr : LargeString not null;
+  @sap.unicode : 'false'
+  @sap.label : 'user name'
+  @sap.creatable : 'false'
+  @sap.updatable : 'false'
+  @sap.sortable : 'false'
+  @sap.filterable : 'false'
+  userName : LargeString not null;
 };
 
 @cds.external : true

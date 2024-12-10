@@ -9,7 +9,7 @@ annotate service.Capex with @(Common.SemanticKey: [documentID], );
 
 annotate service.Capex {
     // ID                     @UI.Hidden               @readonly  @mandatory  @UI.ExcludeFromNavigationContext;
-    ID              @readonly                                          @mandatory  @UI.ExcludeFromNavigationContext; //don't hide display text only
+    ID              @readonly                                        @mandatory                                      @UI.ExcludeFromNavigationContext; //don't hide display text only
     orderType       @validation.message: 'i18n>orderTypeError'       @mandatory;
     site            @validation.message: 'i18n>siteError'            @mandatory;
     amount          @validation.message: 'i18n>amountError'          @mandatory;
@@ -18,14 +18,14 @@ annotate service.Capex {
     currency        @validation.message: 'i18n>currencyError'        @mandatory;
     businessReason  @validation.message: 'i18n>businessReasonError'  @mandatory;
     status          @Core.Computed;
-    totalCost       @Core.Computed                                     @Measures.ISOCurrency: currency_code;
+    totalCost       @Core.Computed                                   @Measures.ISOCurrency: currency_code;
     // description_custom     @Core.Computed           @UI.HiddenFilter: true  @UI.ExcludeFromNavigationContext;
-    description     @UI.MultiLineText;
+    description     @UI.MultiLineText                                @validation.message  : 'i18n>descriptionError'  @mandatory;
     notes           @UI.MultiLineText;
-    createdAt       @UI.HiddenFilter   : false                         @UI.ExcludeFromNavigationContext;
-    createdBy       @UI.HiddenFilter   : false                         @UI.ExcludeFromNavigationContext;
-    modifiedAt      @UI.HiddenFilter   : false                         @UI.ExcludeFromNavigationContext;
-    modifiedBy      @UI.HiddenFilter   : false                         @UI.ExcludeFromNavigationContext;
+    createdAt       @UI.HiddenFilter   : false                       @UI.ExcludeFromNavigationContext;
+    createdBy       @UI.HiddenFilter   : false                       @UI.ExcludeFromNavigationContext;
+    modifiedAt      @UI.HiddenFilter   : false                       @UI.ExcludeFromNavigationContext;
+    modifiedBy      @UI.HiddenFilter   : false                       @UI.ExcludeFromNavigationContext;
 
 
 };

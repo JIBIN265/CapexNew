@@ -178,7 +178,7 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                         .where({ ID: wf_parentId })
                 );
 
-                if (!currentRecord[0].currentApprover) {
+                if (currentRecord[0].currentApprover !== req.user.id) {
                     req.error(404, 'Capex Order Approval Already Completed!');
                 }
                 if (req.errors) { req.reject(); }
@@ -492,11 +492,8 @@ class CapexApproverCatalogService extends cds.ApplicationService {
 
 
         this.on("approve", async (req) => {
-            // const { ID } = req.params[0];
             const Status = 'Approved';
             await approveChange(req, Status);
-            // const newStatus = "E0009";
-            // await statusChange(req, ID, newStatus);
         });
 
 
@@ -568,11 +565,17 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                 }
 
                 if (wf_status === 'Approved' || wf_status === 'Skipped') {
+                    let count;
+                    if (wf_status === 'Approved') {
+                        count = currentRecord[0].approvedCount + 1;
+                    } else if (wf_status === 'Skipped') {
+                        count = currentRecord[0].approvedCount;
+
+                    }
                     const updatedApproverHistory = await db.run(
                         UPDATE(ApproverHistory)
                             .set({
-                                status: wf_status,
-                                // comments: wf_comments
+                                status: wf_status
                             })
                             .where({ up__ID: wf_parentId, ID: wf_childId })
                     );
@@ -601,7 +604,8 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                         }
 
                         const updateMain = await UPDATE(Capex)
-                            .set({ currentApprover: lowestLevelEmail })
+                            .set({ approvedCount: count,
+                                currentApprover: lowestLevelEmail })
                             .where({ ID: wf_parentId });
 
                         if (wf_status === 'Approved') {

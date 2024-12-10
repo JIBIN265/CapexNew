@@ -36,16 +36,21 @@ class CapexCreatorCatalogService extends cds.ApplicationService {
             });
 
         this.before('READ', Capex, async (req) => {
-            let results;
-            try {
-                // Add a filter to fetch only records created by the current user
-                req.query.where({ createdBy: req.user.id });
+            // let results;
+            // try {
+            //     // Add a filter to fetch only records created by the current user
+            //     req.query.where({ createdBy: req.user.id });
 
-                // Execute the query to check for records
-                results = await cds.run(req.query);
-            } catch (error) {
-                // Handle errors gracefully
-                req.reject(500, `An error occurred: ${error.message}`);
+            //     // Execute the query to check for records
+            //     results = await cds.run(req.query);
+            // } catch (error) {
+            //     // Handle errors gracefully
+            //     req.reject(500, `An error occurred: ${error.message}`);
+            // }
+        });
+        this.on('EDIT', Capex, async (req) => {
+            if (req.data.createdBy !== req.user.id) {
+                req.error(404, 'Only the submitter can edit this CapEx order');
             }
         });
 
@@ -301,6 +306,7 @@ class CapexCreatorCatalogService extends cds.ApplicationService {
             data.appropriationLife = req.data.appropriationLife !== undefined ? req.data.appropriationLife.toString() : "0";
             data.currency = req.data.currency_code;
             data.orderNumber = req.data.documentID.toString();
+            data.userName = req.user.id;
 
             console.log("SAP", data);
 

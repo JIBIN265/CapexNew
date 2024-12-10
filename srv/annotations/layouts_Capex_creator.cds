@@ -432,8 +432,8 @@ annotate service.Capex with @(
         TargetValue  : amount,
         Visualization: #Progress,
         // Title        : '{i18n>progressIndicator}',
-        Criticality  : 3,
-        CriticalityRepresentation : #WithoutIcon
+        // Criticality  : 3,
+        // CriticalityRepresentation : #WithoutIcon
     },
     UI.DataPoint #progressIndicator2    : {
         //Search-Term: #ProgressIndicator

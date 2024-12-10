@@ -43,7 +43,7 @@ type statusCount {
 
 aspect DocumentId {
   @description: 'Unique Document ID'
-  documentID : Integer default 0;
+  documentID : String(10);//Integer default 0;
 }
 
 entity Division : CodeList {
@@ -281,7 +281,7 @@ aspect Objectives : cuid, managed {
 aspect CashFlowYear : cuid, managed {
 
   @description: 'Year'
-  year           : Integer default 0; // ZZYEAR4
+  year           : String(4);// default 0; // ZZYEAR4
 
   @description: 'Quarter One'
   cashFlowQOne   : Decimal(11, 2) default 0; // ZZ4CASHFLQ1
