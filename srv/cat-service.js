@@ -615,6 +615,18 @@ class CapexCatalogService extends cds.ApplicationService {
 
         });
 
+        async function calculateWeekdays(startDate, endDate) {
+            let count = 0;
+            let currentDate = new Date(startDate);
+            while (currentDate <= endDate) {
+                const dayOfWeek = currentDate.getDay();
+                if (dayOfWeek !== 0 && dayOfWeek !== 6) { // Exclude Sundays (0) and Saturdays (6)
+                    count++;
+                }
+                currentDate.setDate(currentDate.getDate() + 1); // Move to the next day
+            }
+            return count - 1; // Subtract 1 to exclude the start date itself
+        }
 
         async function statusChange(req, ID, newStatus) {
             try {

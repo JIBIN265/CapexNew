@@ -87,7 +87,9 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                     // Update each `to_ApproverHistory` record's `days` field if status is "Pending"
                     for (let history of capex.to_ApproverHistory) {
                         if (history.status === 'Pending' && history.pendingDate) {
-                            const days = Math.ceil((new Date() - new Date(history.pendingDate)) / (1000 * 60 * 60 * 24));
+                            const pendingDate = new Date(history.pendingDate);
+                            const currentDate = new Date();
+                            const days = calculateWeekdays(pendingDate, currentDate);
                             if (days && history.days !== days) {
                                 history.days = days; // Update only if different
                                 let updateHistory = await db.run(
@@ -105,6 +107,19 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                 return req.error(500, error.message);
             }
         });
+
+        async function calculateWeekdays(startDate, endDate) {
+            let count = 0;
+            let currentDate = new Date(startDate);
+            while (currentDate <= endDate) {
+                const dayOfWeek = currentDate.getDay();
+                if (dayOfWeek !== 0 && dayOfWeek !== 6) { // Exclude Sundays (0) and Saturdays (6)
+                    count++;
+                }
+                currentDate.setDate(currentDate.getDate() + 1); // Move to the next day
+            }
+            return count - 1; // Subtract 1 to exclude the start date itself
+        }
 
         async function statusChange(req, ID, newStatus) {
             try {
@@ -604,8 +619,10 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                         }
 
                         const updateMain = await UPDATE(Capex)
-                            .set({ approvedCount: count,
-                                currentApprover: lowestLevelEmail })
+                            .set({
+                                approvedCount: count,
+                                currentApprover: lowestLevelEmail
+                            })
                             .where({ ID: wf_parentId });
 
                         if (wf_status === 'Approved') {
@@ -629,7 +646,7 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                             const newStatus = currentRecord[0].to_ApproverHistory[0].estat;//"E0010";
                             await statusChange(req, wf_parentId, newStatus);
                         }
-                        
+
                         return {
                             response: 'Workflow ended'
                         };
