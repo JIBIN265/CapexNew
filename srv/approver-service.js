@@ -78,21 +78,6 @@ class CapexApproverCatalogService extends cds.ApplicationService {
             });
         });
 
-        // this.before('DELETE', Capex, async (req) => {
-        //     debugger;
-        //     const currentRecord = await db.run(
-        //         SELECT.from(Capex)
-        //             .columns(cpx => {
-        //                 cpx`*`
-        //             })
-        //             .where({ ID: req.data.ID })
-        //     );
-        //     // if (currentRecord[0].createdBy !== req.user.id) {
-        //     //     req.error(400, 'You are not Allowed to delete the Order');
-        //     //     return;
-        //     // }
-        // });
-
         this.before('READ', ApproverHistory, async (req) => {
 
             try {
@@ -318,6 +303,7 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                         }
                         const userURL = "https://yk2lt6xsylvfx4dz.launchpad.cfapps.us10.hana.ondemand.com/site?siteId=4bf2f916-b150-4361-918c-8a51f5b9c835#zcapexcreator-manage?sap-ui-app-id-hint=saas_approuter_zcapexcreator&/Capex({documentID})?layout=TwoColumnsMidExpanded";
                         dyuserURL = userURL.replace("{documentID}", currentRecord[0]?.documentID);
+                        const fullName = getFullNameFromEmail(email);
                         let testData = {
                             "definitionId": "us10.yk2lt6xsylvfx4dz.zcapexworkflow.triggerWorkflow",
                             "context": {
@@ -350,7 +336,7 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                                 "url": dynamicURL ? String(dynamicURL) : "null",
                                 "approverName": lowestName ? String(lowestName) : "null",
                                 "initiator": currentRecord[0].createdBy ? String(currentRecord[0].createdBy) : "null",
-                                "initiatorName": currentRecord[0].createdBy ? String(currentRecord[0].createdBy) : "null",
+                                "initiatorName": fullName ? String(fullName) : "null",
                                 "userUrl": dyuserURL ? String(dyuserURL) : "null",
                                 "action": "Mail",
                                 "decision": Status,
@@ -362,7 +348,7 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                         let responseMail = await BPA_WORKFLOW1.send('POST', '/', testData);
                         return currentRecord;
                     }
-
+                    const fullName = getFullNameFromEmail(email);
                     let testData = {
                         "definitionId": "us10.yk2lt6xsylvfx4dz.zcapexworkflow.triggerWorkflow",
                         "context": {
@@ -395,7 +381,7 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                             "url": dynamicURL ? String(dynamicURL) : "null",
                             "approverName": lowestName ? String(lowestName) : "null",
                             "initiator": currentRecord[0].createdBy ? String(currentRecord[0].createdBy) : "null",
-                            "initiatorName": currentRecord[0].createdBy ? String(currentRecord[0].createdBy) : "null",
+                            "initiatorName": fullName ? String(fullName) : "null",
                             "userUrl": dyuserURL ? String(dyuserURL) : "null",
                             "action": "Create",
                             "decision": "",
@@ -470,6 +456,7 @@ class CapexApproverCatalogService extends cds.ApplicationService {
 
                     const userURL = "https://yk2lt6xsylvfx4dz.launchpad.cfapps.us10.hana.ondemand.com/site?siteId=4bf2f916-b150-4361-918c-8a51f5b9c835#zcapexcreator-manage?sap-ui-app-id-hint=saas_approuter_zcapexcreator&/Capex({documentID})?layout=TwoColumnsMidExpanded";
                     dyuserURL = userURL.replace("{documentID}", currentRecord[0]?.documentID);
+                    const fullName = getFullNameFromEmail(email);
                     let testData = {
                         "definitionId": "us10.yk2lt6xsylvfx4dz.zcapexworkflow.triggerWorkflow",
                         "context": {
@@ -502,7 +489,7 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                             "url": dynamicURL ? String(dynamicURL) : "null",
                             "approverName": lowestName ? String(lowestName) : "null",
                             "initiator": currentRecord[0].createdBy ? String(currentRecord[0].createdBy) : "null",
-                            "initiatorName": currentRecord[0].createdBy ? String(currentRecord[0].createdBy) : "null",
+                            "initiatorName": fullName ? String(fullName) : "null",
                             "userUrl": dyuserURL ? String(dyuserURL) : "null",
                             "action": "Mail",
                             "decision": Status,
@@ -524,6 +511,20 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                 }
             }
 
+        }
+
+        function getFullNameFromEmail(email) {
+            if (!email || !email.includes('@')) {
+                return null; // Return null for invalid email
+            }
+
+            // Extract the part before '@'
+            const namePart = email.split('@')[0];
+
+            // Replace '.' with a space and return the result
+            const fullName = namePart.replace('.', ' ');
+
+            return fullName;
         }
 
 
@@ -646,6 +647,8 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                             .set({
                                 approvedCount: count,
                                 currentApprover: lowestLevelEmail,
+                                modifiedBy: currentRecord[0]?.createdBy,
+                                modifiedAt: new Date()
                             })
                             .where({ ID: wf_parentId });
 
@@ -667,15 +670,24 @@ class CapexApproverCatalogService extends cds.ApplicationService {
 
                     } else {
                         if (wf_status === 'Approved') {
-                            const newStatus = currentRecord[0].to_ApproverHistory[0].estat;//"E0010";
+                            const newStatus = currentRecord[0].to_ApproverHistory[0].estat;
                             await statusChange(req, wf_parentId, newStatus);
                         }
+
+                        const updateMain = await UPDATE(Capex)
+                            .set({
+                                approvedCount: count,
+                                currentApprover: '',
+                                modifiedBy: currentRecord[0]?.createdBy,
+                                modifiedAt: new Date()
+                            })
+                            .where({ ID: wf_parentId });
 
                         return {
                             response: 'Workflow ended'
                         };
                     }
-
+                    const fullName = getFullNameFromEmail(email);
                     let testData = {
                         "definitionId": "us10.yk2lt6xsylvfx4dz.zcapexworkflow.triggerWorkflow",
                         "context": {
@@ -708,7 +720,7 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                             "url": dynamicURL ? String(dynamicURL) : "null",
                             "approverName": lowestName ? String(lowestName) : "null",
                             "initiator": currentRecord[0].createdBy ? String(currentRecord[0].createdBy) : "null",
-                            "initiatorName": currentRecord[0].createdBy ? String(currentRecord[0].createdBy) : "null",
+                            "initiatorName": fullName ? String(fullName) : "null",
                             "userUrl": dyuserURL ? String(dyuserURL) : "null",
                             "action": "Create",
                             "decision": "",
@@ -743,7 +755,9 @@ class CapexApproverCatalogService extends cds.ApplicationService {
 
                     const updateMain = await UPDATE(Capex)
                         .set({
-                            currentApprover: ''
+                            currentApprover: '',
+                            modifiedBy: currentRecord[0]?.createdBy,
+                            modifiedAt: new Date()
                         })
                         .where({ ID: wf_parentId });
 

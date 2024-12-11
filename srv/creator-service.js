@@ -409,7 +409,7 @@ class CapexCreatorCatalogService extends cds.ApplicationService {
                 const userURL = "https://yk2lt6xsylvfx4dz.launchpad.cfapps.us10.hana.ondemand.com/site?siteId=4bf2f916-b150-4361-918c-8a51f5b9c835#zcapexcreator-manage?sap-ui-app-id-hint=saas_approuter_zcapexcreator&/Capex({documentID})?layout=TwoColumnsMidExpanded";
                 const dyuserURL = userURL.replace("{documentID}", req.data.documentID);
                 const lowestName = currentAppHis[0].approverName;
-
+                const fullName  = getFullNameFromEmail(req.user.id);
 
                 let testData = {
                     "definitionId": "us10.yk2lt6xsylvfx4dz.zcapexworkflow.triggerWorkflow",
@@ -443,7 +443,7 @@ class CapexCreatorCatalogService extends cds.ApplicationService {
                         "url": dynamicURL ? String(dynamicURL) : "null",
                         "approverName": lowestName ? String(lowestName) : "null",
                         "initiator": req.user.id,
-                        "initiatorName": req.user.id,
+                        "initiatorName": fullName  ? String(fullName ) : "null",
                         "userUrl": dyuserURL ? String(dyuserURL) : "null",
                         "action": "Create",
                         "decision": "",
@@ -555,6 +555,20 @@ class CapexCreatorCatalogService extends cds.ApplicationService {
 
 
         });
+
+        function getFullNameFromEmail(email) {
+            if (!email || !email.includes('@')) {
+                return null; // Return null for invalid email
+            }
+
+            // Extract the part before '@'
+            const namePart = email.split('@')[0];
+
+            // Replace '.' with a space and return the result
+            const fullName = namePart.replace('.', ' ');
+
+            return fullName;
+        }
 
         function calculateWeekdays(startDate, endDate) {
             let count = 0;
