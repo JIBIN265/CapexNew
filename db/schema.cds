@@ -43,7 +43,7 @@ type statusCount {
 
 aspect DocumentId {
   @description: 'Unique Document ID'
-  documentID : String(10);//Integer default 0;
+  documentID : String(10); //Integer default 0;
 }
 
 entity Division : CodeList {
@@ -218,6 +218,7 @@ entity CapexEntity : cuid, managed, CapexMain, DocumentId, messageImport {
 
   approvedCount       : Integer @Core.Computed;
   totalApprovals      : Integer @Core.Computed;
+  virtual currentUser : User;
 
   @description: 'Current Approver'
   currentApprover     : User;
@@ -281,7 +282,7 @@ aspect Objectives : cuid, managed {
 aspect CashFlowYear : cuid, managed {
 
   @description: 'Year'
-  year           : String(4);// default 0; // ZZYEAR4
+  year           : String(4); // default 0; // ZZYEAR4
 
   @description: 'Quarter One'
   cashFlowQOne   : Decimal(11, 2) default 0; // ZZ4CASHFLQ1

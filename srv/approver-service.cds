@@ -7,51 +7,17 @@ service CapexApproverCatalogService @(path: 'approver') @(requires: 'authenticat
 
     entity Capex                 as projection on persistence.CapexEntity
         actions {
+            @(Common.SideEffects.TargetEntities: ['/CapexApproverCatalogService.EntityContainer/Capex'])
             action validate(text : String  @Common.Label:'Reason for Skip?'  @UI.MultiLineText:true  )           returns Capex;
             @(Common.IsActionCritical: true)
-            @(
-                cds.odata.bindingparameter.name: '_it',
-                Common.SideEffects             : {
-                    TargetProperties: ['in/to_ApproverHistory/status']}
-                    // TargetEntities: [
-                    // '$Return',
-                    // 'in/to_ApproverHistory',
-                    // 'in/to_Comments']
-                
-            )
+            @(Common.SideEffects.TargetEntities: ['/CapexApproverCatalogService.EntityContainer/Capex'])
             action approve(in : $self)                                                                           returns Capex;
 
-            @(
-                cds.odata.bindingparameter.name: '_it',
-                Common.SideEffects             : {TargetEntities: ['$Return']}
-            )
-
+            @(Common.SideEffects.TargetEntities: ['/CapexApproverCatalogService.EntityContainer/Capex'])
             action rejectFinal2(text : String  @Common.Label:'Reason for Rejection?'  @UI.MultiLineText:true  )  returns Capex;
 
-            @(
-                cds.odata.bindingparameter.name: '_it',
-                Common.SideEffects             : {TargetEntities: ['$Return']}
-            )
+            @(Common.SideEffects.TargetEntities: ['/CapexApproverCatalogService.EntityContainer/Capex'])
             action rejectIncomplete(text : String  @Common.Label:'Reason for Rework?'  @UI.MultiLineText:true  ) returns Capex;
-
-            @(
-                cds.odata.bindingparameter.name: '_it',
-                Common.SideEffects             : {TargetEntities: ['_it']}
-            )
-            action workflowApprove()                                                                             returns {
-                status : String(10);
-                orderNumber : String(12);
-            };
-
-            action workflowIncomplete()                                                                          returns {
-                status : String(10);
-                orderNumber : String(12);
-            };
-
-            action workflowFinal()                                                                               returns {
-                status : String(10);
-                orderNumber : String(12);
-            };
 
             action workflow(status : String(15), childId : String(40), comments : String(1000))                  returns {
                 response : String(10);

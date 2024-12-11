@@ -92,7 +92,7 @@ annotate service.Capex with @(
             Label               : '{i18n>ApproverHistory}',
             ID                  : 'ApproverHistory',
             Target              : 'to_ApproverHistory/@UI.SelectionPresentationVariant#ApproverHistory',
-            ![@UI.PartOfPreview]: false
+            // ![@UI.PartOfPreview]: false
         },
     ],
     UI.Identification : [
@@ -462,8 +462,8 @@ annotate service.Capex with @(
         Value        : totalCost,
         TargetValue  : amount,
         Visualization: #Progress,
-        // Title        : '{i18n>progressIndicator}',
-        // Criticality  : 3,
+    // Title        : '{i18n>progressIndicator}',
+    // Criticality  : 3,
     },
     UI.DataPoint #progressIndicator2    : {
         //Search-Term: #ProgressIndicator
@@ -476,85 +476,179 @@ annotate service.Capex with @(
 
 );
 
-
 annotate service.Capex with @(
-    UI.SelectionVariant #SelectionVariantAll       : {
-        Text         : 'All Orders',
-        ID           : 'SelectionVariantAll',
-        SelectOptions: [{PropertyName: status}]
-    },
-    UI.SelectionVariant #SelectionVariantApproved  : {
-        ID           : 'SelectionVariantApproved',
-        Text         : 'Approved',
-        SelectOptions: [{
-            PropertyName: status,
-            Ranges      : [{
-                Sign  : #I,
-                Option: #EQ,
-                Low   : 'E0009',
+    UI.SelectionPresentationVariant #tableView : {
+        $Type              : 'UI.SelectionPresentationVariantType',
+        ID                 : 'tableViewID',
+        PresentationVariant: {
+            $Type         : 'UI.PresentationVariantType',
+            Visualizations: ['@UI.LineItem', ],
+            SortOrder     : [{
+                $Type     : 'Common.SortOrderType',
+                Property  : documentID,
+                Descending: true,
             }, ],
-        }, ],
-    },
-    UI.SelectionVariant #SelectionVariantFinal     : {
-        ID           : 'SelectionVariantFinal',
-        Text         : 'Rejected Final',
-        SelectOptions: [{
-            PropertyName: status,
-            Ranges      : [{
-                Sign  : #I,
-                Option: #EQ,
-                Low   : 'E0010',
+        },
+        SelectionVariant   : {
+            $Type        : 'UI.SelectionVariantType',
+            SelectOptions: [{
+                $Type       : 'UI.SelectOptionType',
+                PropertyName: currentApprover,
+                Ranges      : [{
+                    Sign  : #I,
+                    Option: #EQ,
+                    Low   : '$user',
+                }, ],
             }, ],
-        }, ],
+        },
+        Text               : '{i18n>PendingApprovals}',
     },
-    UI.SelectionVariant #SelectionVariantIncomplete: {
-        ID           : 'SelectionVariantIncomplete',
-        Text         : 'Rejected Incomplete',
-        SelectOptions: [{
-            PropertyName: status,
-            Ranges      : [{
-                Sign  : #I,
-                Option: #EQ,
-                Low   : 'E0011',
+    UI.SelectionPresentationVariant #tableView1: {
+        $Type              : 'UI.SelectionPresentationVariantType',
+        ID                 : 'tableView1ID',
+        PresentationVariant: {
+            $Type         : 'UI.PresentationVariantType',
+            Visualizations: ['@UI.LineItem', ],
+            SortOrder     : [{
+                $Type     : 'Common.SortOrderType',
+                Property  : documentID,
+                Descending: true,
             }, ],
-        }, ],
-    },
-
-    UI.SelectionVariant #SelectionVariantApprover  : {
-        ID           : 'SelectionVariantApprover',
-        Text         : 'Approved',
-        SelectOptions: [{
-            PropertyName: 'to_ApproverHistory/email',
-            Ranges      : [{
-                Sign  : #I,
-                Option: #EQ,
-                Low   : '$user.name',
-            }, ],
-        }, ],
-    },
+        },
+        SelectionVariant   : {
+            $Type        : 'UI.SelectionVariantType',
+            SelectOptions: [],
+        },
+        Text               : '{i18n>AllOrders}',
+    }
 );
 
 
-annotate service.Capex with @Aggregation.ApplySupported: {
-    Transformations       : [
-        'aggregate',
-        'topcount',
-        'bottomcount',
-        'identity',
-        'concat',
-        'groupby',
-        'filter',
-        // 'expand',
-        'search'
-    ],
-    Rollup                : #None,
-    PropertyRestrictions  : true,
-    GroupableProperties   : [
-        orderNumber,
-        status,
-        site,
-        orderType,
-        division
-    ],
-    AggregatableProperties: [{Property: documentID, }],
-};
+// annotate service.Capex with @(
+//     UI.SelectionVariant #SelectionVariantAll       : {
+//         Text         : 'All Orders',
+//         ID           : 'SelectionVariantAll',
+//         SelectOptions: [{PropertyName: status}]
+//     },
+//     UI.SelectionVariant #SelectionVariantPending  : {
+//         ID           : 'SelectionVariantApproved',
+//         Text         : 'Approved',
+//         SelectOptions: [{
+//             PropertyName: status,
+//             Ranges      : [{
+//                 Sign  : #I,
+//                 Option: #EQ,
+//                 Low   : 'E0009',
+//             }, ],
+//         }, ],
+//     },
+//     UI.SelectionVariant #SelectionVariantFinal     : {
+//         ID           : 'SelectionVariantFinal',
+//         Text         : 'Rejected Final',
+//         SelectOptions: [{
+//             PropertyName: status,
+//             Ranges      : [{
+//                 Sign  : #I,
+//                 Option: #EQ,
+//                 Low   : 'E0010',
+//             }, ],
+//         }, ],
+//     },
+//     UI.SelectionVariant #SelectionVariantIncomplete: {
+//         ID           : 'SelectionVariantIncomplete',
+//         Text         : 'Rejected Incomplete',
+//         SelectOptions: [{
+//             PropertyName: status,
+//             Ranges      : [{
+//                 Sign  : #I,
+//                 Option: #EQ,
+//                 Low   : 'E0011',
+//             }, ],
+//         }, ],
+//     },
+
+//     UI.SelectionVariant #SelectionVariantApprover  : {
+//         ID           : 'SelectionVariantApprover',
+//         Text         : 'Approved',
+//         SelectOptions: [{
+//             PropertyName: 'to_ApproverHistory/email',
+//             Ranges      : [{
+//                 Sign  : #I,
+//                 Option: #EQ,
+//                 Low   : '$user.name',
+//             }, ],
+//         }, ],
+//     },
+// );
+
+
+// annotate service.Capex with @(UI.SelectionPresentationVariant #CapexSortPending: {
+//     $Type                                               : 'UI.SelectionPresentationVariantType',
+//     PresentationVariant #PresentationVariantCapexPending: {
+//         $Type         : 'UI.PresentationVariantType',
+//         Visualizations: ['@UI.LineItem'],
+//         SortOrder     : [{
+//             $Type     : 'Common.SortOrderType',
+//             Property  : documentID,
+//             Descending: true,
+//         }, ],
+//     },
+//     // SelectionVariant #CapexSelectionVariantPending      : {
+//     //     $Type        : 'UI.SelectionVariantType',
+//     //     Text         : 'Pending Approvals',
+//     //     SelectOptions: [{
+//     //         $Type       : 'UI.SelectOptionType',
+//     //         PropertyName: currentApprover,
+//     //         Ranges      : [{
+//     //             Sign  : #I,
+//     //             Option: #NE,
+//     //             Low   : '$user.name',
+//     //         }, ],
+//     //     }, ],
+//     },
+// });
+
+// annotate service.Capex with @(UI.SelectionPresentationVariant #CapexSort: {
+//     $Type                                            : 'UI.SelectionPresentationVariantType',
+//     PresentationVariant #PresentationVariantCapexSort: {
+//         $Type         : 'UI.PresentationVariantType',
+//         Visualizations: ['@UI.LineItem'],
+//         SortOrder     : [{
+//             $Type     : 'Common.SortOrderType',
+//             Property  : documentID,
+//             Descending: true,
+//         }]
+//     },
+//     SelectionVariant #CapexSelectionVariantAll       : {
+//         $Type        : 'UI.SelectionVariantType',
+//         Text         : 'All Orders',
+//         SelectOptions: [{
+//             $Type       : 'UI.SelectOptionType',
+//             PropertyName: currentApprover
+//         }]
+//     }
+// });
+
+// annotate service.Capex with @Aggregation.ApplySupported: {
+//     Transformations       : [
+//         'aggregate',
+//         'topcount',
+//         'bottomcount',
+//         'identity',
+//         'concat',
+//         'groupby',
+//         'filter',
+//         // 'expand',
+//         'search'
+//     ],
+//     Rollup                : #None,
+//     PropertyRestrictions  : true,
+//     GroupableProperties   : [
+//         orderNumber,
+//         status,
+//         site,
+//         orderType,
+//         division
+//     ],
+//     AggregatableProperties: [{Property: documentID, }],
+// };

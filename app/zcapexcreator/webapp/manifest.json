@@ -132,15 +132,6 @@
           ]
         },
         {
-          "pattern": "Capex({key})/to_CashFlowYear({key2}):?query:",
-          "name": "CashFlowYearObjectPage",
-          "target": [
-            "CapexList",
-            "CapexObjectPage",
-            "CashFlowYearObjectPage"
-          ]
-        },
-        {
           "name": "Capex_attachmentsViewPdfPagePage",
           "pattern": "Capex({key})/attachments({attachmentsKey}):?query:",
           "target": [
@@ -327,7 +318,8 @@
                   }
                 }
               },
-              "initialLoad": "Enabled"
+              "initialLoad": "Enabled",
+              "defaultTemplateAnnotationPath": "com.sap.vocabularies.UI.v1.SelectionPresentationVariant#CapexSort"
             }
           },
           "controlAggregation": "beginColumnPages",
@@ -344,11 +336,6 @@
               "showRelatedApps": true,
               "contextPath": "/Capex",
               "navigation": {
-                "to_CashFlowYear": {
-                  "detail": {
-                    "route": "CashFlowYearObjectPage"
-                  }
-                },
                 "attachments": {
                   "detail": {
                     "route": "Capex_attachmentsViewPdfPagePage"
@@ -387,11 +374,14 @@
                 "to_CashFlowYear/@com.sap.vocabularies.UI.v1.LineItem#AnnualCashFlow": {
                   "tableSettings": {
                     "creationMode": {
-                      "createAtEnd": true,
-                      "name": "InlineCreationRows"
+                      "createAtEnd": false,
+                      "name": "Inline",
+                      "inlineCreationRowsHiddenInEditMode": true
                     },
                     "selectAll": true,
-                    "selectionMode": "Multi"
+                    "selectionMode": "Multi",
+                    "type": "GridTable",
+                    "enableFullScreen": true
                   }
                 },
                 "to_Objectives/@com.sap.vocabularies.UI.v1.LineItem#Objectives": {
@@ -421,18 +411,6 @@
                     "viewpdf": {
                       "press": "zcapexcreator.ext.controller.Viewpdf.viewpdf",
                       "visible": true,
-                      "enabled": true,
-                      "requiresSelection": true,
-                      "text": "View PDF"
-                    }
-                  }
-                },
-                "attachments/@com.sap.vocabularies.UI.v1.LineItem": {
-                  "actions": {
-                    "viewpdf": {
-                      "press": "zcapexcreator.ext.fragment.Viewpdf.viewpdf",
-                      "visible": true,
-                      "enableOnSelect": "single",
                       "enabled": true,
                       "requiresSelection": true,
                       "text": "View PDF"
@@ -474,20 +452,6 @@
           },
           "controlAggregation": "midColumnPages",
           "contextPattern": "/Capex({key})"
-        },
-        "CashFlowYearObjectPage": {
-          "type": "Component",
-          "id": "CashFlowYearObjectPage",
-          "name": "sap.fe.templates.ObjectPage",
-          "options": {
-            "settings": {
-              "editableHeaderContent": false,
-              "enhanceI18n": "i18n/customI18N.properties",
-              "contextPath": "/Capex/to_CashFlowYear"
-            }
-          },
-          "controlAggregation": "endColumnPages",
-          "contextPattern": "/Capex({key})/to_CashFlowYear({key2})"
         },
         "Capex_attachmentsViewPdfPagePage": {
           "type": "Component",

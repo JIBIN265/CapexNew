@@ -35,24 +35,24 @@ class CapexCreatorCatalogService extends cds.ApplicationService {
 
             });
 
-        this.before('READ', Capex, async (req) => {
-            // let results;
-            // try {
-            //     // Add a filter to fetch only records created by the current user
-            //     req.query.where({ createdBy: req.user.id });
+        // this.before('READ', Capex, async (req) => {
+        //     // let results;
+        //     // try {
+        //     //     // Add a filter to fetch only records created by the current user
+        //     //     req.query.where({ createdBy: req.user.id });
 
-            //     // Execute the query to check for records
-            //     results = await cds.run(req.query);
-            // } catch (error) {
-            //     // Handle errors gracefully
-            //     req.reject(500, `An error occurred: ${error.message}`);
-            // }
-        });
-        this.on('EDIT', Capex, async (req) => {
-            if (req.data.createdBy !== req.user.id) {
-                req.error(404, 'Only the submitter can edit this CapEx order');
-            }
-        });
+        //     //     // Execute the query to check for records
+        //     //     results = await cds.run(req.query);
+        //     // } catch (error) {
+        //     //     // Handle errors gracefully
+        //     //     req.reject(500, `An error occurred: ${error.message}`);
+        //     // }
+        // });
+        // // this.on('EDIT', Capex, async (req) => {
+        // //     if (req.data.createdBy !== req.user.id) {
+        // //         req.error(404, 'Only the submitter can edit this CapEx order');
+        // //     }
+        // // });
 
         this.before('READ', ApproverHistory, async (req) => {
 
@@ -288,7 +288,7 @@ class CapexCreatorCatalogService extends cds.ApplicationService {
                 req.error(400, `Appropriation costs should match the total amount `, `in/amount`);
             }
 
-            const record = await db.run(SELECT.one.from(Capex).where({ ID: ID }));
+            // const record = await db.run(SELECT.one.from(Capex).where({ ID: ID }));
 
             if (req.errors) { req.reject(); }
 
@@ -299,19 +299,19 @@ class CapexCreatorCatalogService extends cds.ApplicationService {
                 'currency_code', 'to_CashFlowYear', 'to_Objectives', 'attachments', 'to_RejectionReasons',
                 'ID', 'status', 'documentID', 'notes', 'numericSeverity', 'to_Comments', 'downtime', 'appropriationLife',
                 'targetDate', 'integerValue', 'forecastValue', 'targetValue', 'dimensions', 'fieldWithPrice',
-                'starsValue', 'fieldWithUoM', 'to_ApproverHistory', 'to_Notes', 'approvedCount', 'totalApprovals', 'currentApprover'
+                'starsValue', 'fieldWithUoM', 'to_ApproverHistory', 'to_Notes', 'approvedCount', 'totalApprovals',
+                'currentApprover', 'currentUser'
             ];
-            fieldsToDelete.forEach(field => delete data[field]);
-
-            // Convert specific fields
-            data.downtime = req.data.downtime !== undefined ? req.data.downtime.toString() : "0";
-            data.appropriationLife = req.data.appropriationLife !== undefined ? req.data.appropriationLife.toString() : "0";
-            data.currency = req.data.currency_code;
-            data.orderNumber = req.data.documentID.toString();
-            data.userName = req.user.id;
-
-            console.log("SAP", data);
-
+            if (data) {
+                fieldsToDelete.forEach(field => delete data[field]);
+                // Convert specific fields
+                data.downtime = req.data.downtime !== undefined ? req.data.downtime.toString() : "0";
+                data.appropriationLife = req.data.appropriationLife !== undefined ? req.data.appropriationLife.toString() : "0";
+                data.currency = req.data.currency_code;
+                data.orderNumber = req.data.documentID.toString();
+                data.userName = req.user.id;
+                console.log("SAP", data);
+            }
             let errorMessage = '';
             let successData = null;
 
@@ -327,28 +327,12 @@ class CapexCreatorCatalogService extends cds.ApplicationService {
                 req.data.orderNumber = successData.orderNumber;
 
                 console.log(`Order ${successData.orderNumber} created successfully`);
-            } catch (error) {
-                // Handle the error case
-                if (error.code) {
-                    errorMessage = error.message || "An exception was raised.";
-
-                    // Extract more detailed error information if available
-                    if (error.innerError && error.innerError.errordetails) {
-                        error.innerError.errordetails.forEach(detail => {
-                            errorMessage += `\n${detail.code}: ${detail.message}`;
-                        });
-                    }
-                } else {
-                    errorMessage = "An unexpected error occurred";
-                }
             }
-
-            // Now you can use errorMessage and successData as needed
-            if (errorMessage) {
-                req.data.notes = errorMessage;
-                console.error("Error:", errorMessage);
-            } else {
-                console.log("Success:", successData);
+            catch (error) {
+                req.data.notes = error.message;
+                req.error(404, error.message);
+                if (req.errors) { req.reject(); }
+                console.log("Error:", error.message);
             }
 
         });
@@ -566,12 +550,13 @@ class CapexCreatorCatalogService extends cds.ApplicationService {
             }
             else {
                 req.notify("Order has been successfully copied and saved as a new draft.");
+                return oCapex;
             }
 
 
         });
 
-        async function calculateWeekdays(startDate, endDate) {
+        function calculateWeekdays(startDate, endDate) {
             let count = 0;
             let currentDate = new Date(startDate);
             while (currentDate <= endDate) {

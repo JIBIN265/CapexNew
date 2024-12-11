@@ -88,20 +88,19 @@ annotate service.Capex with @(
             Target: 'to_Objectives/@UI.LineItem#Objectives',
         },
         {
-            $Type : 'UI.ReferenceFacet',
-            Label : '{i18n>ApproverHistory}',
-            ID    : 'ApproverHistory',
-            Target: 'to_ApproverHistory/@UI.SelectionPresentationVariant#ApproverHistory',
-            ![@UI.PartOfPreview] : false
+            $Type               : 'UI.ReferenceFacet',
+            Label               : '{i18n>ApproverHistory}',
+            ID                  : 'ApproverHistory',
+            Target              : 'to_ApproverHistory/@UI.SelectionPresentationVariant#ApproverHistory',
+            // ![@UI.PartOfPreview]: false
         },
     ],
-    UI.Identification : [
-        {
-            $Type : 'UI.DataFieldForAction',
-            Action: 'CapexCreatorCatalogService.copyCapex',
-            Label : '{i18n>Copy}',
-        },
-    ],
+    UI.Identification : [{
+        $Type : 'UI.DataFieldForAction',
+        Action: 'CapexCreatorCatalogService.copyCapex',
+        Label : '{i18n>Copy}',
+        ![@UI.IsCopyAction] : true,
+    }, ],
     UI.LineItem       : {
         $value            : [
             {
@@ -139,9 +138,10 @@ annotate service.Capex with @(
                 Value: division,
             },
             {
-                $Type              : 'UI.DataFieldForAction',
-                Action             : 'CapexCreatorCatalogService.copyCapex',
-                Label              : '{i18n>Copy}',
+                $Type : 'UI.DataFieldForAction',
+                Action: 'CapexCreatorCatalogService.copyCapex',
+                Label : '{i18n>Copy}',
+                ![@UI.IsCopyAction] : true,
             },
             {
                 $Type: 'UI.DataField',
@@ -431,9 +431,9 @@ annotate service.Capex with @(
         Value        : totalCost,
         TargetValue  : amount,
         Visualization: #Progress,
-        // Title        : '{i18n>progressIndicator}',
-        // Criticality  : 3,
-        // CriticalityRepresentation : #WithoutIcon
+    // Title        : '{i18n>progressIndicator}',
+    // Criticality  : 3,
+    // CriticalityRepresentation : #WithoutIcon
     },
     UI.DataPoint #progressIndicator2    : {
         //Search-Term: #ProgressIndicator
@@ -503,6 +503,23 @@ annotate service.Capex with @(
         }, ],
     },
 );
+
+annotate service.Capex with @UI.SelectionPresentationVariant #CapexSort: {
+    $Type              : 'UI.SelectionPresentationVariantType',
+    PresentationVariant: {
+        $Type         : 'UI.PresentationVariantType',
+        Visualizations: ['@UI.LineItem', ],
+        SortOrder     : [{
+            $Type     : 'Common.SortOrderType',
+            Property  : documentID,
+            Descending: true,
+        }, ],
+    },
+    SelectionVariant   : {
+        $Type        : 'UI.SelectionVariantType',
+        SelectOptions: [],
+    },
+};
 
 
 annotate service.Capex with @Aggregation.ApplySupported: {

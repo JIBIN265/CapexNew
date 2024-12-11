@@ -6,10 +6,7 @@ using {ZODATA_INTERNAL_ORDER_SRV as external} from './external/ZODATA_INTERNAL_O
 service CapexCreatorCatalogService @(path: 'creator') @(requires: 'authenticated-user') {
     entity Capex                 as projection on persistence.CapexEntity
         actions {
-            @(
-                cds.odata.bindingparameter.name: '_it',
-                Common.SideEffects             : {TargetEntities: ['$Return']}
-            )
+              @(Common.SideEffects.TargetEntities: ['/CapexCreatorCatalogService.EntityContainer/Capex'])
             action copyCapex(in : $self) returns Capex;
         };
 

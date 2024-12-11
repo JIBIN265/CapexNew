@@ -91,4 +91,14 @@ annotate service.Cot001Set with {
 annotate service.Notes with {
     recipient  @title: '{i18n>recipient}'  @UI.Placeholder: '{i18n>placeHolderRecipient}';
     text       @title: '{i18n>text}'       @UI.Placeholder: '{i18n>placeHolderText}'  @UI.MultiLineText: true;
-}
+};
+
+
+annotate service.ApproverHistory with {
+    level        @title: '{i18n>ApproverLevel}';
+    email        @title: '{i18n>Email}';
+    status       @title: '{i18n>status}';
+    days         @title: '{i18n>NumberOfDays}';
+    approverName @title: '{i18n>ApproverName}';
+    estat        @title: '{i18n>estat}';
+};

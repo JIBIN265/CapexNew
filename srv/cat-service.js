@@ -615,7 +615,7 @@ class CapexCatalogService extends cds.ApplicationService {
 
         });
 
-        async function calculateWeekdays(startDate, endDate) {
+       function calculateWeekdays(startDate, endDate) {
             let count = 0;
             let currentDate = new Date(startDate);
             while (currentDate <= endDate) {

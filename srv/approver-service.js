@@ -36,36 +36,62 @@ class CapexApproverCatalogService extends cds.ApplicationService {
             });
 
         this.before('READ', Capex, async (req) => {
+            // //     req.query.SELECT.columns.push({ ref: ['currentUser'], val: req.user.id });
+            // //     // try {
+            // //     //     // Add a filter to fetch only records created by the current user
+            // //     //     req.query.where({ currentApprover: req.user.id });
 
-            try {
-                // Add a filter to fetch only records created by the current user
-                req.query.where({ currentApprover: req.user.id });
+            // //     //     // Execute the query to check for records
+            // //     //     const results = await cds.run(req.query);
 
-                // Execute the query to check for records
-                const results = await cds.run(req.query);
-
-            } catch (error) {
-                // Handle errors gracefully
-                req.reject(500, `An error occurred: ${error.message}`);
+            // //     // } catch (error) {
+            // //     //     // Handle errors gracefully
+            // //     //     req.reject(500, `An error occurred: ${error.message}`);
+            // //     // }
+            const query = req.query;     // Access the filters (if any)
+            const filters = query.SELECT.where;     // Log or process the filters
+            console.log('Filters:', filters);
+            // const filters = req.query.SELECT.where;     // Check if filters exist
+            if (filters) {
+                for (let i = 0; i < filters.length; i++) {
+                    const condition = filters[i];         // Look for a condition with currentuser = $user
+                    if (
+                        condition && condition.xpr && condition.xpr[0] && condition.xpr[0].ref &&
+                        condition.xpr[0].ref[0] && condition.xpr[0].ref[0] === 'currentApprover' &&
+                        condition.xpr[i + 1] && condition.xpr[i + 1] === '=' &&
+                        condition.xpr[i + 2] &&
+                        condition.xpr[i + 2].val === '$user'
+                    ) {
+                        condition.xpr[i + 2].val = req.user.id; console.log(`Replaced $user with ${req.user.id}`);
+                    }
+                }
             }
 
         });
 
-
-        this.before('DELETE', Capex, async (req) => {
-            debugger;
-            const currentRecord = await db.run(
-                SELECT.from(Capex)
-                    .columns(cpx => {
-                        cpx`*`
-                    })
-                    .where({ ID: req.data.ID })
-            );
-            if (currentRecord[0].createdBy !== req.user.id) {
-                req.error(400, 'You are not Allowed to delete the Order');
-                return;
-            }
+        this.after('READ', Capex, async (results, req) => {
+            return results.map(async result => {
+                if (!result.currentUser) {
+                    result.currentUser = req.user.id;
+                }
+                return result;
+            });
         });
+
+        // this.before('DELETE', Capex, async (req) => {
+        //     debugger;
+        //     const currentRecord = await db.run(
+        //         SELECT.from(Capex)
+        //             .columns(cpx => {
+        //                 cpx`*`
+        //             })
+        //             .where({ ID: req.data.ID })
+        //     );
+        //     // if (currentRecord[0].createdBy !== req.user.id) {
+        //     //     req.error(400, 'You are not Allowed to delete the Order');
+        //     //     return;
+        //     // }
+        // });
 
         this.before('READ', ApproverHistory, async (req) => {
 
@@ -108,7 +134,7 @@ class CapexApproverCatalogService extends cds.ApplicationService {
             }
         });
 
-        async function calculateWeekdays(startDate, endDate) {
+        function calculateWeekdays(startDate, endDate) {
             let count = 0;
             let currentDate = new Date(startDate);
             while (currentDate <= endDate) {
@@ -194,7 +220,7 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                 );
 
                 if (currentRecord[0].currentApprover !== req.user.id) {
-                    req.error(404, 'Capex Order Approval Already Completed!');
+                    req.error(404, 'You are not the Current Approver');
                 }
                 if (req.errors) { req.reject(); }
                 let wf_instanceID;
@@ -334,10 +360,7 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                         };
                         let BPA_WORKFLOW1 = await cds.connect.to('BPA_WORKFLOW');
                         let responseMail = await BPA_WORKFLOW1.send('POST', '/', testData);
-
-                        return {
-                            response: 'Workflow ended'
-                        };
+                        return currentRecord;
                     }
 
                     let testData = {
@@ -414,21 +437,20 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                     testData.context.decision = Status; // Replace with your logic
                     testData.context.appComments = wfComments;
                     let responseMail = await BPA_WORKFLOW.send('POST', '/', testData);
-
-
-
-                    return {
-                        response: `${response} ${lowestLevelID} 'Workflow Triggered'`
-                    };
+                    return currentRecord;
                 } else if (wf_status === 'Rejected') {
                     const updatedApproverHistory = await db.run(
                         UPDATE(ApproverHistory)
                             .set({
                                 status: wf_status
-                                // comments: wf_comments
                             })
                             .where({ up__ID: wf_parentId, ID: wf_childId })
                     );
+                    const updateMain = await UPDATE(Capex)
+                        .set({
+                            currentApprover: ''
+                        })
+                        .where({ ID: wf_parentId });
 
                     let deletePayload = [
                         {
@@ -493,22 +515,22 @@ class CapexApproverCatalogService extends cds.ApplicationService {
 
                     const newStatus = "E0010";
                     await statusChange(req, wf_parentId, newStatus);
-                    return {
-                        response: 'Workflow Triggered Rejected'
-                    };
+                    return currentRecord;
                 }
-
+                return currentRecord;
             } catch (error) {
                 return {
                     response: `Status update failed: ${error.message}`
                 }
             }
+
         }
 
 
         this.on("approve", async (req) => {
             const Status = 'Approved';
-            await approveChange(req, Status);
+            const currentRecord = await approveChange(req, Status);
+            return currentRecord;
         });
 
 
@@ -519,7 +541,8 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                 return;
             }
             const Status = 'Rejected';
-            await approveChange(req, Status, Comments);
+            const currentRecord = await approveChange(req, Status, Comments);
+            return currentRecord;
         });
 
         this.on("validate", async req => {
@@ -529,7 +552,8 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                 return;
             }
             const Status = 'Skipped';
-            await approveChange(req, Status, Comments);
+            const currentRecord = await approveChange(req, Status, Comments);
+            return currentRecord;
         });
 
 
@@ -621,7 +645,7 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                         const updateMain = await UPDATE(Capex)
                             .set({
                                 approvedCount: count,
-                                currentApprover: lowestLevelEmail
+                                currentApprover: lowestLevelEmail,
                             })
                             .where({ ID: wf_parentId });
 
@@ -716,6 +740,12 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                             })
                             .where({ up__ID: wf_parentId, ID: wf_childId })
                     );
+
+                    const updateMain = await UPDATE(Capex)
+                        .set({
+                            currentApprover: ''
+                        })
+                        .where({ ID: wf_parentId });
 
                     const newStatus = "E0010";
                     await statusChange(req, wf_parentId, newStatus);

@@ -1,7 +1,7 @@
 _schema-version: 3.3.0
 ID: zcapex
 description: Kruger Capital Expenditure Approval Process
-version: 1.0.2
+version: 1.0.4
 modules:
 - name: zcapex-srv
   type: nodejs
@@ -13,6 +13,7 @@ modules:
   - name: zcapex-connectivity
   - name: zcapex-destination-service
   - name: sbpa_dms_repo
+  - name: zcapex-malwarescanner
   provides:
   - name: srv-api
     properties:
@@ -38,6 +39,10 @@ modules:
   - name: zcapex-destination-service
     parameters:
       content-target: true
+  - name: zcapex-malwarescanner
+    parameters:
+          service-key:
+            name: malwarescanner-key
   - name: zcapex-repo-host
     parameters:
       service-key:
@@ -54,6 +59,9 @@ modules:
           ServiceInstanceName: zcapex-html5-srv
           ServiceKeyName: zcapex-repo-host-key
           sap.cloud.service: hana.app
+        - Name: zcapex-malwarescanner-dest
+          ServiceInstanceName: zcapex-malwarescanner
+          ServiceKeyName: malwarescanner-key
         - Authentication: OAuth2UserTokenExchange
           Name: hana_app_uaa_zcapex
           ServiceInstanceName: zcapex-xsuaa-service
@@ -209,6 +217,7 @@ resources:
           destinations:
           - Authentication: NoAuthentication
             HTML5.DynamicDestination: true
+            HTML5.Timeout: 120000
             HTML5.ForwardAuthToken: true
             Name: zcapex-srv
             ProxyType: Internet
@@ -242,6 +251,12 @@ resources:
   parameters:
     service: connectivity
     service-plan: lite
+- name: zcapex-malwarescanner
+  type: org.cloudfoundry.managed-service
+  parameters:
+      service: malware-scanner
+      service-name: zcapex-malwarescanner
+      service-plan: clamav
 parameters:
   deploy_mode: html5-repo
   enable-parallel-deployments: true

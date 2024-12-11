@@ -43,7 +43,7 @@
     "build": "rimraf resources mta_archives && mbt build --mtar archive",
     "deploy": "cf deploy mta_archives/archive.mtar --retries 1",
     "clean": "rimraf \"**/*mta_archives\" \"**/*gen\" \"**/*resources\" \"**/*dist\" \"**/*node_modules\" \"**/*package-lock.json\"",
-    "all": "npm run clean && npm run cds && npm run build && npm run deploy",
+    "all": "npm run clean && npm run cds && npm run build && npm run deploy && npm run clean && npm run cds",
     "watch-zcapexmain": "cds watch --open zcapexmain/webapp/index.html?sap-ui-xx-viewCache=false",
     "watch-zcapexapprover": "cds watch --open zcapexapprover/webapp/index.html?sap-ui-xx-viewCache=false",
     "watch-zcapexcreator": "cds watch --open zcapexcreator/webapp/index.html?sap-ui-xx-viewCache=false",
