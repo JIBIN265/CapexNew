@@ -35,24 +35,6 @@ class CapexCreatorCatalogService extends cds.ApplicationService {
 
             });
 
-        // this.before('READ', Capex, async (req) => {
-        //     // let results;
-        //     // try {
-        //     //     // Add a filter to fetch only records created by the current user
-        //     //     req.query.where({ createdBy: req.user.id });
-
-        //     //     // Execute the query to check for records
-        //     //     results = await cds.run(req.query);
-        //     // } catch (error) {
-        //     //     // Handle errors gracefully
-        //     //     req.reject(500, `An error occurred: ${error.message}`);
-        //     // }
-        // });
-        // // this.on('EDIT', Capex, async (req) => {
-        // //     if (req.data.createdBy !== req.user.id) {
-        // //         req.error(404, 'Only the submitter can edit this CapEx order');
-        // //     }
-        // // });
 
         this.before('READ', ApproverHistory, async (req) => {
 
@@ -284,15 +266,16 @@ class CapexCreatorCatalogService extends cds.ApplicationService {
             } = req.data;
 
             if (totalCost !== amount) {
-                // req.error(400, `TOTALCOST`, `in/amount`, amount);
                 req.error(400, `Appropriation costs should match the total amount `, `in/amount`);
             }
 
-            // const record = await db.run(SELECT.one.from(Capex).where({ ID: ID }));
-
             if (req.errors) { req.reject(); }
 
-            // let data = req.data;
+        });
+
+        this.after('SAVE', Capex, async (_, req) => {
+            console.log(req.data);
+
             let data = JSON.parse(JSON.stringify(req.data));
             // Delete unnecessary fields
             const fieldsToDelete = [
@@ -300,7 +283,7 @@ class CapexCreatorCatalogService extends cds.ApplicationService {
                 'ID', 'status', 'documentID', 'notes', 'numericSeverity', 'to_Comments', 'downtime', 'appropriationLife',
                 'targetDate', 'integerValue', 'forecastValue', 'targetValue', 'dimensions', 'fieldWithPrice',
                 'starsValue', 'fieldWithUoM', 'to_ApproverHistory', 'to_Notes', 'approvedCount', 'totalApprovals',
-                'currentApprover', 'currentUser'
+                'currentApprover', 'currentUser', 'createdAt', 'createdBy', 'modifiedAt', 'modifiedBy'
             ];
             if (data) {
                 fieldsToDelete.forEach(field => delete data[field]);
@@ -324,7 +307,11 @@ class CapexCreatorCatalogService extends cds.ApplicationService {
 
                 // If we reach here, it means the operation was successful
                 successData = result;
-                req.data.orderNumber = successData.orderNumber;
+                const updateOrder = await UPDATE(Capex)
+                    .set({
+                        orderNumber: successData.orderNumber
+                    })
+                    .where({ ID: req.data.ID });
 
                 console.log(`Order ${successData.orderNumber} created successfully`);
             }
@@ -335,14 +322,10 @@ class CapexCreatorCatalogService extends cds.ApplicationService {
                 console.log("Error:", error.message);
             }
 
-        });
-
-        this.after('SAVE', Capex, async (_, req) => {
-            console.log(req.data);
-
             const newStatus = "E0001";
             await statusChange(req, req.data.ID, newStatus);
 
+            let crOrderNumber = successData.orderNumber;
             let approverlist;
             let currentApprover;
             try {
@@ -350,7 +333,7 @@ class CapexCreatorCatalogService extends cds.ApplicationService {
                 approverlist = await ecc.tx(req).run(
                     SELECT.from('ApproverLevelsSet').where({
                         Site: req.data.site?.toString(),
-                        Order: req.data.orderNumber?.toString(),
+                        Order: crOrderNumber?.toString(),
                         OrderType: req.data.orderType?.toString(),
                         Division: req.data.division?.toString(),
                         Amount: req.data.amount?.toString(),
@@ -409,12 +392,12 @@ class CapexCreatorCatalogService extends cds.ApplicationService {
                 const userURL = "https://yk2lt6xsylvfx4dz.launchpad.cfapps.us10.hana.ondemand.com/site?siteId=4bf2f916-b150-4361-918c-8a51f5b9c835#zcapexcreator-manage?sap-ui-app-id-hint=saas_approuter_zcapexcreator&/Capex({documentID})?layout=TwoColumnsMidExpanded";
                 const dyuserURL = userURL.replace("{documentID}", req.data.documentID);
                 const lowestName = currentAppHis[0].approverName;
-                const fullName  = getFullNameFromEmail(req.user.id);
+                const fullName = getFullNameFromEmail(req.user.id);
 
                 let testData = {
                     "definitionId": "us10.yk2lt6xsylvfx4dz.zcapexworkflow.triggerWorkflow",
                     "context": {
-                        "orderNumber": req.data.orderNumber ? String(req.data.orderNumber) : "null",
+                        "orderNumber": crOrderNumber ? String(crOrderNumber) : "null",
                         "orderType": req.data.orderType ? String(req.data.orderType) : "null",
                         "companyCode": req.data.companyCode ? String(req.data.companyCode) : "null",
                         "site": req.data.site ? String(req.data.site) : "null",
@@ -443,7 +426,7 @@ class CapexCreatorCatalogService extends cds.ApplicationService {
                         "url": dynamicURL ? String(dynamicURL) : "null",
                         "approverName": lowestName ? String(lowestName) : "null",
                         "initiator": req.user.id,
-                        "initiatorName": fullName  ? String(fullName ) : "null",
+                        "initiatorName": fullName ? String(fullName) : "null",
                         "userUrl": dyuserURL ? String(dyuserURL) : "null",
                         "action": "Create",
                         "decision": "",

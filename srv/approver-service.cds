@@ -10,6 +10,7 @@ service CapexApproverCatalogService @(path: 'approver') @(requires: 'authenticat
             @(Common.SideEffects.TargetEntities: ['/CapexApproverCatalogService.EntityContainer/Capex'])
             action validate(text : String  @Common.Label:'Reason for Skip?'  @UI.MultiLineText:true  )           returns Capex;
             @(Common.IsActionCritical: true)
+            @(Common.SideEffects.TargetProperties: ['/CapexApproverCatalogService.EntityContainer/Capex.approvedCount'])
             @(Common.SideEffects.TargetEntities: ['/CapexApproverCatalogService.EntityContainer/Capex'])
             action approve(in : $self)                                                                           returns Capex;
 
