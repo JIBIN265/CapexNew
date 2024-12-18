@@ -462,6 +462,7 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                 let dynamicURL;
                 let lowestName;
                 let statusHistory;
+                let count;
 
                 const wf_childId = currentRecord[0]?.to_ApproverHistory?.find(record => record.status === 'Pending')?.ID;
                 if (wf_childId) {
@@ -471,7 +472,6 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                 }
                 wf_instanceID = currentRecord[0]?.to_ApproverHistory?.find(record => record.status === 'Pending')?.instanceId;
                 if (wf_status === 'Approved' || wf_status === 'Skipped') {
-                    let count;
                     if (wf_status === 'Approved') {
                         count = currentRecord[0].approvedCount + 1;
                     } else if (wf_status === 'Skipped') {
@@ -605,7 +605,9 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                         }
 
                         let responseMail = await BPA_WORKFLOW1.send('POST', '/', testData);
-                        return currentRecord;
+                        let returnRecord = currentRecord;
+                        returnRecord[0].approvedCount = count;
+                        return returnRecord;
                     }
                     const fullName = getFullNameFromEmail(currentRecord[0].createdBy);
                     let testData = {
@@ -682,7 +684,9 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                     testData.context.decision = Status; // Replace with your logic
                     testData.context.appComments = wfComments;
                     let responseMail = await BPA_WORKFLOW.send('POST', '/', testData);
-                    return currentRecord;
+                    let returnRecord = currentRecord;
+                    returnRecord[0].approvedCount = count;
+                    return returnRecord;
                 } else if (wf_status === 'Rejected') {
                     const updatedApproverHistory = await db.run(
                         UPDATE(ApproverHistory)

@@ -69,6 +69,7 @@ annotate service.Capex with @(
                 Value : status,
                 Criticality : to_Status.criticality,
                 CriticalityRepresentation : #WithIcon,
+                Label : '{i18n>SapStatus}',
             },
             {
                 $Type : 'UI.DataField',

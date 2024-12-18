@@ -200,6 +200,13 @@ aspect CapexMain {
   @description: 'Targeted Approval Date'
   targetDate           : Date;
 
+  approvedCount        : Integer           @Core.Computed;
+  totalApprovals       : Integer           @Core.Computed;
+  virtual currentUser  : User;
+
+  @description: 'Current Approver'
+  currentApprover      : User;
+
   @description: 'Status Value Association'
   to_Status            : Association to one StatusValues
                            on to_Status.code = status;
@@ -215,13 +222,6 @@ entity StatusValues : cuid, managed, {
 }
 
 entity CapexEntity : cuid, managed, CapexMain, DocumentId, messageImport {
-
-  approvedCount       : Integer @Core.Computed;
-  totalApprovals      : Integer @Core.Computed;
-  virtual currentUser : User;
-
-  @description: 'Current Approver'
-  currentApprover     : User;
 
   @description: 'Cash Flow Year Composition'
   to_CashFlowYear     : Composition of many CashFlowYear;
