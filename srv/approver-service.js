@@ -170,6 +170,7 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                         .where({ ID: wf_parentId })
                 );
 
+                let mailApprover = currentRecord[0]?.currentApprover;
                 let statusHistory = (currentRecord[0] && currentRecord[0].to_ApproverHistory)
                     ? currentRecord[0].to_ApproverHistory.filter(history => history.ID === wf_childId)
                     : [];
@@ -177,7 +178,8 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                 if (wf_comments) {
                     const newComment = {
                         up__ID: wf_parentId,
-                        text: wf_comments
+                        text: wf_comments,
+                        createdBy: mailApprover
                     };
 
                     const insertedComment = await db.run(
@@ -227,7 +229,8 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                         const updateMain = await UPDATE(Capex)
                             .set({
                                 approvedCount: count,
-                                currentApprover: lowestLevelEmail
+                                currentApprover: lowestLevelEmail,
+                                modifiedBy: mailApprover
                             })
                             .where({ ID: wf_parentId });
 
@@ -256,7 +259,8 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                         const updateMain = await UPDATE(Capex)
                             .set({
                                 approvedCount: count,
-                                currentApprover: ''
+                                currentApprover: '',
+                                modifiedBy: mailApprover
                             })
                             .where({ ID: wf_parentId });
 
@@ -332,7 +336,8 @@ class CapexApproverCatalogService extends cds.ApplicationService {
 
                     const updateMain = await UPDATE(Capex)
                         .set({
-                            currentApprover: ''
+                            currentApprover: '',
+                            modifiedBy: mailApprover
                         })
                         .where({ ID: wf_parentId });
 
@@ -464,6 +469,7 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                 let statusHistory;
                 let count;
 
+                let mailApprover = getFullNameFromEmail(currentRecord[0]?.currentApprover);
                 const wf_childId = currentRecord[0]?.to_ApproverHistory?.find(record => record.status === 'Pending')?.ID;
                 if (wf_childId) {
                     statusHistory = (currentRecord[0] && currentRecord[0].to_ApproverHistory)
@@ -680,6 +686,7 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                     }
 
                     //for sending mail to initiator:
+                    testData.context.approverName = mailApprover;
                     testData.context.action = "Mail"
                     testData.context.decision = Status; // Replace with your logic
                     testData.context.appComments = wfComments;
@@ -786,7 +793,11 @@ class CapexApproverCatalogService extends cds.ApplicationService {
             const namePart = email.split('@')[0];
 
             // Replace '.' with a space and return the result
-            const fullName = namePart.replace('.', ' ');
+            // const fullName = namePart.replace('.', ' ');
+            const fullName = namePart
+                .split('.')
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                .join(' ');
 
             return fullName;
         }

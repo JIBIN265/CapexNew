@@ -1,9 +1,9 @@
 ###
-POST http://localhost:4004/odata/v4/approver/Capex(ID='6f51c3a0-89f6-4ee6-b692-0d5aadba6083',IsActiveEntity=true)/CapexApproverCatalogService.workflow
+POST http://localhost:4004/odata/v4/approver/Capex(ID='0f04b503-32ef-488c-8cad-3edfaf42a3bb',IsActiveEntity=true)/CapexApproverCatalogService.workflow
 Content-Type: application/json
 
 {
-    "status": "Approved",
-    "childId": "f511c242-7821-4dd9-b376-23f326396b63",
+    "status": "Skipped",
+    "childId": "4e03a1ae-3f9a-4ee8-9a56-0d85549b9abf",
     "comments": "2nd level"
 }
