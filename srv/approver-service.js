@@ -211,6 +211,12 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                         filteredApproverHistory = currentRecord[0].to_ApproverHistory.filter(history => history.status === 'Skipped');
                     }
 
+                    if (wf_status === 'Skipped') {
+                        if (filteredApproverHistory.length === 0) {
+                            filteredApproverHistory = currentRecord[0].to_ApproverHistory.filter(history => history.status === 'Pending');
+                        }
+                    }
+
                     if (filteredApproverHistory.length > 0) {
                         const sortedApprovers = filteredApproverHistory.sort((a, b) => a.Level - b.Level);
                         lowestLevelEmail = sortedApprovers[0]?.email;
@@ -501,6 +507,12 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                         filteredApproverHistory = currentRecord[0].to_ApproverHistory.filter(history => history.status === 'Skipped');
                     }
 
+                    if (wf_status === 'Skipped') {
+                        if (filteredApproverHistory.length === 0) {
+                            filteredApproverHistory = currentRecord[0].to_ApproverHistory.filter(history => history.status === 'Pending');
+                        }
+                    }
+
                     if (filteredApproverHistory.length > 0) {
                         const sortedApprovers = filteredApproverHistory.sort((a, b) => a.Level - b.Level);
                         lowestLevelEmail = sortedApprovers[0]?.email
@@ -550,6 +562,9 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                                     currentApprover: lowestLevelEmail
                                 })
                                 .where({ ID: wf_parentId }))
+                        if (!lowestName) {
+                            lowestName = getFullNameFromEmail(currentRecord[0].currentApprover);
+                        }
                         const userURL = "https://yk2lt6xsylvfx4dz.launchpad.cfapps.us10.hana.ondemand.com/site?siteId=4bf2f916-b150-4361-918c-8a51f5b9c835#zcapexcreator-manage?sap-ui-app-id-hint=saas_approuter_zcapexcreator&/Capex({documentID})?layout=TwoColumnsMidExpanded";
                         dyuserURL = userURL.replace("{documentID}", currentRecord[0]?.documentID);
                         const fullName = getFullNameFromEmail(currentRecord[0].createdBy);

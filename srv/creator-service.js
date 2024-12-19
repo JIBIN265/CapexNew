@@ -548,7 +548,11 @@ class CapexCreatorCatalogService extends cds.ApplicationService {
             const namePart = email.split('@')[0];
 
             // Replace '.' with a space and return the result
-            const fullName = namePart.replace('.', ' ');
+            // const fullName = namePart.replace('.', ' ');
+            const fullName = namePart
+                .split('.')
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                .join(' ');
 
             return fullName;
         }
