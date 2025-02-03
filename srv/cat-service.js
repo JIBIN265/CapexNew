@@ -138,8 +138,6 @@ class CapexCatalogService extends cds.ApplicationService {
             req.data.approvedCount = 0;
         });
 
-
-
         this.before('UPDATE', Capex.drafts, async (req) => {
             console.log("UPDATE Capex.drafts:");
             const {
@@ -209,51 +207,6 @@ class CapexCatalogService extends cds.ApplicationService {
                 // throw new Error('Failed to retrieve error count.');
             }
         });
-
-        // this.on('getStatusCount', async (req) => {
-        //     try {
-        //         const statusKeys = ['N', 'X', 'E0011', 'D', 'E0010', 'E0009']; // Example status keys
-        //         const statusCount = await getStatusCounts(statusKeys);
-
-        //         return statusCount;
-        //     } catch (error) {
-        //         // Handle errors gracefully
-        //         console.error('Error in getErrorCount:', error.message);
-        //         // throw new Error('Failed to retrieve error count.');
-        //     }
-        // });
-
-
-        // async function getStatusCounts(keys) {
-        //     const keyMappings = {
-        //         'N': 'inProgressCount',
-        //         'X': 'Count',
-        //         'E0011': 'rejectIncompleteCount',
-        //         'D': 'draftCount',
-        //         'E0010': 'rejectFinalCount',
-        //         'E0009': 'approvedCount'
-        //     };
-
-        //     const statusCount = {};
-
-        //     const conditions = keys.map(key => `status = '${key}'`).join(' OR ');
-        //     const query = SELECT
-        //         .from(Capex)
-        //         .columns(['status', 'COUNT(*) AS count'])
-        //         .where(conditions)
-        //         .groupBy('status');
-
-        //     const results = await db.run(query);
-
-        //     results.forEach(result => {
-        //         const mappedKey = keyMappings[result.status];
-        //         statusCount[mappedKey] = result.count;
-        //     });
-
-        //     return statusCount;
-        // }
-
-
 
         this.before('UPDATE', CashFlowYear.drafts, async (req) => {
             console.log("UPDATE before CashFlowYear.drafts:");
