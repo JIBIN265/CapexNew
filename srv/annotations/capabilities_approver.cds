@@ -1,6 +1,6 @@
 using CapexApproverCatalogService as service from '../approver-service';
 
-// annotate service.Capex with @odata.draft.enabled; //Search-Term: #Draft
+annotate service.Capex with @odata.draft.enabled; //Search-Term: #Draft
 // annotate service.StatusValues with @odata.draft.enabled;
 // annotate service.Sustainability2030 with @odata.draft.enabled;
 

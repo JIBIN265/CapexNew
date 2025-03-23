@@ -77,4 +77,6 @@ service CapexCreatorCatalogService @(path: 'creator') @(requires: 'authenticated
     @(requires: 'authenticated-user')
     function getStatusCount()              returns persistence.statusCount;
 
+    // entity Attachments as projection on persistence.CapexEntity.attachments;
+
 };

@@ -440,7 +440,7 @@ class CapexCatalogService extends cds.ApplicationService {
 
 
                 let testData = {
-                    "definitionId": "us10.yk2lt6xsylvfx4dz.zcapexworkflow.triggerWorkflow",
+                    "definitionId": "ca10.capex-development-683d45ho.zcapexopexworkflow.triggerWorkflow",
                     "context": {
                         "orderNumber": req.data.orderNumber ? String(req.data.orderNumber) : "null",
                         "orderType": req.data.orderType ? String(req.data.orderType) : "null",
@@ -731,7 +731,7 @@ class CapexCatalogService extends cds.ApplicationService {
                     }
 
                     let testData = {
-                        "definitionId": "us10.yk2lt6xsylvfx4dz.zcapexworkflow.triggerWorkflow",
+                        "definitionId": "ca10.capex-development-683d45ho.zcapexopexworkflow.triggerWorkflow",
                         "context": {
                             "orderNumber": currentRecord[0].orderNumber ? String(currentRecord[0].orderNumber) : "null",
                             "orderType": currentRecord[0].orderType ? String(currentRecord[0].orderType) : "null",
@@ -960,7 +960,7 @@ class CapexCatalogService extends cds.ApplicationService {
                     }
 
                     let testData = {
-                        "definitionId": "us10.yk2lt6xsylvfx4dz.zcapexworkflow.triggerWorkflow",
+                        "definitionId": "ca10.capex-development-683d45ho.zcapexopexworkflow.triggerWorkflow",
                         "context": {
                             "orderNumber": currentRecord[0].orderNumber ? String(currentRecord[0].orderNumber) : "null",
                             "orderType": currentRecord[0].orderType ? String(currentRecord[0].orderType) : "null",

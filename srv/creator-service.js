@@ -21,8 +21,12 @@ class CapexCreatorCatalogService extends cds.ApplicationService {
             MasterDataSet,
             CurrencyF4Set,
             ApproverLevelsSet,
-            UserRolesSet
+            UserRolesSet,
+            // Attachments
+            // Capex_attachments
         } = this.entities;
+
+        // const { attachments } = Capex.attachments;
 
         const db = await cds.connect.to("db");
 
@@ -250,6 +254,27 @@ class CapexCreatorCatalogService extends cds.ApplicationService {
             console.log("Calculated total:", req.data.total);
         });
 
+        this.before('READ', Capex.drafts, async (req) => {
+            const attachments = await db.run(
+                SELECT.from('CAPEXCREATORCATALOGSERVICE_CAPEX_ATTACHMENTS_DRAFTS')
+                    .columns(ath => {
+                        ath`*`
+                    })
+                    .where({ up__ID: req.data.ID, mimeType: "application/octet-stream" })
+            );
+
+            for (const attachment of attachments) {
+                // Extract filename and check if it ends with '.pdf'
+                if (attachment.FILENAME && attachment.FILENAME.toLowerCase().endsWith('.pdf')) {
+                    await db.run(
+                        UPDATE('CAPEXCREATORCATALOGSERVICE_CAPEX_ATTACHMENTS_DRAFTS')
+                            .set({ mimeType: 'application/pdf' })
+                            .where({ ID: attachment.ID })
+                    );
+                }
+            }
+        });
+
 
         this.before('SAVE', Capex, async req => {
             const { attachments } = req.data;
@@ -395,7 +420,7 @@ class CapexCreatorCatalogService extends cds.ApplicationService {
                 const fullName = getFullNameFromEmail(req.user.id);
 
                 let testData = {
-                    "definitionId": "us10.yk2lt6xsylvfx4dz.zcapexworkflow.triggerWorkflow",
+                    "definitionId": "ca10.capex-development-683d45ho.zcapexopexworkflow.triggerWorkflow",
                     "context": {
                         "orderNumber": crOrderNumber ? String(crOrderNumber) : "null",
                         "orderType": req.data.orderType ? String(req.data.orderType) : "null",

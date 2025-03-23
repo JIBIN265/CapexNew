@@ -276,7 +276,7 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                     }
                     const fullName = getFullNameFromEmail(currentRecord[0].createdBy);
                     let testData = {
-                        "definitionId": "us10.yk2lt6xsylvfx4dz.zcapexworkflow.triggerWorkflow",
+                        "definitionId": "ca10.capex-development-683d45ho.zcapexopexworkflow.triggerWorkflow",
                         "context": {
                             "orderNumber": currentRecord[0].orderNumber ? String(currentRecord[0].orderNumber) : "null",
                             "orderType": currentRecord[0].orderType ? String(currentRecord[0].orderType) : "null",
@@ -569,7 +569,7 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                         dyuserURL = userURL.replace("{documentID}", currentRecord[0]?.documentID);
                         const fullName = getFullNameFromEmail(currentRecord[0].createdBy);
                         let testData = {
-                            "definitionId": "us10.yk2lt6xsylvfx4dz.zcapexworkflow.triggerWorkflow",
+                            "definitionId": "ca10.capex-development-683d45ho.zcapexopexworkflow.triggerWorkflow",
                             "context": {
                                 "orderNumber": currentRecord[0].orderNumber ? String(currentRecord[0].orderNumber) : "null",
                                 "orderType": currentRecord[0].orderType ? String(currentRecord[0].orderType) : "null",
@@ -632,7 +632,7 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                     }
                     const fullName = getFullNameFromEmail(currentRecord[0].createdBy);
                     let testData = {
-                        "definitionId": "us10.yk2lt6xsylvfx4dz.zcapexworkflow.triggerWorkflow",
+                        "definitionId": "ca10.capex-development-683d45ho.zcapexopexworkflow.triggerWorkflow",
                         "context": {
                             "orderNumber": currentRecord[0].orderNumber ? String(currentRecord[0].orderNumber) : "null",
                             "orderType": currentRecord[0].orderType ? String(currentRecord[0].orderType) : "null",
@@ -744,7 +744,7 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                     dyuserURL = userURL.replace("{documentID}", currentRecord[0]?.documentID);
                     const fullName = getFullNameFromEmail(currentRecord[0].createdBy);
                     let testData = {
-                        "definitionId": "us10.yk2lt6xsylvfx4dz.zcapexworkflow.triggerWorkflow",
+                        "definitionId": "ca10.capex-development-683d45ho.zcapexopexworkflow.triggerWorkflow",
                         "context": {
                             "orderNumber": currentRecord[0].orderNumber ? String(currentRecord[0].orderNumber) : "null",
                             "orderType": currentRecord[0].orderType ? String(currentRecord[0].orderType) : "null",

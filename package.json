@@ -7,7 +7,7 @@
   "private": true,
   "dependencies": {
     "@cap-js/hana": "^1",
-    "@cap-js/sdm": "^1.2.2",
+    "@cap-js/sdm": "1.2.2",
     "@sap-cloud-sdk/connectivity": "^3.9.0",
     "@sap-cloud-sdk/generator": "^3.16.0",
     "@sap-cloud-sdk/http-client": "^3.16.0",
@@ -26,6 +26,7 @@
     "querystring": "^0.2.1"
   },
   "peerDependencies": {
+    "@cap-js/attachments": "1.2.1",
     "@sap/cds": "8.6.0"
   },
   "devDependencies": {
@@ -58,7 +59,7 @@
     "requires": {
       "sdm": {
         "settings": {
-          "repositoryId": "892137e0-6733-4d62-af33-396218298252"
+          "repositoryId": "eed7ce75-2d81-4935-ad50-f0f78db4367f"
         }
       },
       "BPA_WORKFLOW": {

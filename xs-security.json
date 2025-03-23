@@ -1,5 +1,5 @@
 {
-  "xsappname": "zcapex-${org}-${space}",
+  "xsappname": "zcapex-kruger",
   "description": "XSUAA Security profile of Kruger Capital Expenditure Approval Process",
   "tenant-mode": "dedicated",
   "scopes": [

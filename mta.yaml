@@ -1,7 +1,7 @@
 _schema-version: 3.3.0
 ID: zcapex
 description: Kruger Capital Expenditure Approval Process
-version: 1.0.24
+version: 1.0.9
 modules:
 - name: zcapex-srv
   type: nodejs
@@ -190,19 +190,19 @@ resources:
     config:
       role-collections:
       - description: Approve Kruger Capital Expenditure Approval Process
-        name: ZCapexApprover-${space}
+        name: ZCapexApprover-kruger
         role-template-references:
         - $XSAPPNAME.ZCapexApprover
       - description: Use Kruger Capital Expenditure Approval Process
-        name: ZCapexUser-${space}
+        name: ZCapexUser-kruger
         role-template-references:
         - $XSAPPNAME.ZCapexUser
       - description: Administer Kruger Capital Expenditure Approval Process
-        name: ZCapexAdmin-${space}
+        name: ZCapexAdmin-kruger
         role-template-references:
         - $XSAPPNAME.ZCapexAdmin
       tenant-mode: dedicated
-      xsappname: zcapex-${org}-${space}
+      xsappname: zcapex-kruger
     path: ./xs-security.json
     service: xsuaa
     service-name: zcapex-xsuaa-service
