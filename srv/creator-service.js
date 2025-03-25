@@ -412,9 +412,9 @@ class CapexCreatorCatalogService extends cds.ApplicationService {
                 const lowestLevelEmail = currentApprover;
                 const lowestLevelID = currentAppHis[0].ID;
                 const lowestFolderID = req.data.attachments[0]?.folderId;
-                const baseURL = "https://yk2lt6xsylvfx4dz.launchpad.cfapps.us10.hana.ondemand.com/site/Kruger#zcapexapprover-manage?sap-ui-app-id-hint=saas_approuter_capex&/Capex({documentID})?layout=TwoColumnsMidExpanded";
-                const dynamicURL = baseURL.replace("{documentID}", req.data.ID);
-                const userURL = "https://yk2lt6xsylvfx4dz.launchpad.cfapps.us10.hana.ondemand.com/site?siteId=4bf2f916-b150-4361-918c-8a51f5b9c835#zcapexcreator-manage?sap-ui-app-id-hint=saas_approuter_zcapexcreator&/Capex({documentID})?layout=TwoColumnsMidExpanded";
+                const baseURL = "https://capex-development-683d45ho.launchpad.cfapps.ca10.hana.ondemand.com/site/Kruger#zcapexapprover-manage?sap-ui-app-id-hint=saas_approuter_zcapexapprover&/Capex({documentID})?layout=TwoColumnsMidExpanded";
+                const dynamicURL = baseURL.replace("{documentID}", req.data.documentID);
+                const userURL = "https://capex-development-683d45ho.launchpad.cfapps.ca10.hana.ondemand.com/site/Kruger#zcapexcreator-manage?sap-ui-app-id-hint=saas_approuter_zcapexcreator&/Capex({documentID})?layout=TwoColumnsMidExpanded";
                 const dyuserURL = userURL.replace("{documentID}", req.data.documentID);
                 const lowestName = currentAppHis[0].approverName;
                 const fullName = getFullNameFromEmail(req.user.id);

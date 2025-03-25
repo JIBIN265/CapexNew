@@ -434,7 +434,7 @@ class CapexCatalogService extends cds.ApplicationService {
                 const lowestLevelEmail = 'jibin.thomas@msitek.us';//sortedApprovers[0]?.Email;
                 const lowestLevelID = currentAppHis[0].ID;
                 const lowestFolderID = req.data.attachments[0]?.folderId;
-                const baseURL = "https://yk2lt6xsylvfx4dz.launchpad.cfapps.us10.hana.ondemand.com/site/Kruger#zcapexapprover-manage?sap-ui-app-id-hint=saas_approuter_capex&/Capex({documentID})?layout=TwoColumnsMidExpanded";
+                const baseURL = "https://capex-development-683d45ho.launchpad.cfapps.ca10.hana.ondemand.com/site/Kruger#zcapexapprover-manage?sap-ui-app-id-hint=saas_approuter_zcapexapprover&/Capex({documentID})?layout=TwoColumnsMidExpanded";
                 const dynamicURL = baseURL.replace("{documentID}", req.data.documentID);
                 const lowestName = currentAppHis[0].approverName;
 

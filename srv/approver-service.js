@@ -222,9 +222,9 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                         lowestLevelEmail = sortedApprovers[0]?.email;
                         lowestLevelID = sortedApprovers[0]?.ID;
                         lowestFolderID = currentRecord[0]?.attachments?.[0]?.folderId || null;
-                        const baseURL = "https://yk2lt6xsylvfx4dz.launchpad.cfapps.us10.hana.ondemand.com/site/Kruger#zcapexapprover-manage?sap-ui-app-id-hint=saas_approuter_zcapexapprover&/Capex({documentID})?layout=TwoColumnsMidExpanded";
-                        dynamicURL = baseURL.replace("{documentID}", currentRecord[0]?.ID);
-                        const userURL = "https://yk2lt6xsylvfx4dz.launchpad.cfapps.us10.hana.ondemand.com/site?siteId=4bf2f916-b150-4361-918c-8a51f5b9c835#zcapexcreator-manage?sap-ui-app-id-hint=saas_approuter_zcapexcreator&/Capex({documentID})?layout=TwoColumnsMidExpanded";
+                        const baseURL = "https://capex-development-683d45ho.launchpad.cfapps.ca10.hana.ondemand.com/site/Kruger#zcapexapprover-manage?sap-ui-app-id-hint=saas_approuter_zcapexapprover&/Capex({documentID})?layout=TwoColumnsMidExpanded";
+                        dynamicURL = baseURL.replace("{documentID}", currentRecord[0]?.documentID);
+                        const userURL = "https://capex-development-683d45ho.launchpad.cfapps.ca10.hana.ondemand.com/site/Kruger#zcapexcreator-manage?sap-ui-app-id-hint=saas_approuter_zcapexcreator&/Capex({documentID})?layout=TwoColumnsMidExpanded";
                         dyuserURL = userURL.replace("{documentID}", currentRecord[0]?.documentID);
                         if (wf_status === 'Approved') {
                             lowestName = currentRecord[0].to_ApproverHistory[0].approverName;
@@ -433,8 +433,9 @@ class CapexApproverCatalogService extends cds.ApplicationService {
         }
 
         async function approveChange(req, Status, wfComments) {
-            const wf_parentId = req.params[0];
-            const wf_status = Status;
+
+            let wf_parentId = req.params[0].ID;
+            let wf_status = Status;
             try {
                 const currentRecord = await db.run(
                     SELECT.from(Capex)
@@ -518,9 +519,9 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                         lowestLevelEmail = sortedApprovers[0]?.email
                         lowestLevelID = sortedApprovers[0]?.ID;
                         lowestFolderID = currentRecord[0]?.attachments?.[0]?.folderId || null;
-                        const baseURL = "https://yk2lt6xsylvfx4dz.launchpad.cfapps.us10.hana.ondemand.com/site/Kruger#zcapexapprover-manage?sap-ui-app-id-hint=saas_approuter_zcapexapprover&/Capex({documentID})?layout=TwoColumnsMidExpanded";
-                        dynamicURL = baseURL.replace("{documentID}", currentRecord[0]?.ID);
-                        const userURL = "https://yk2lt6xsylvfx4dz.launchpad.cfapps.us10.hana.ondemand.com/site?siteId=4bf2f916-b150-4361-918c-8a51f5b9c835#zcapexcreator-manage?sap-ui-app-id-hint=saas_approuter_zcapexcreator&/Capex({documentID})?layout=TwoColumnsMidExpanded";
+                        const baseURL = "https://capex-development-683d45ho.launchpad.cfapps.ca10.hana.ondemand.com/site/Kruger#zcapexapprover-manage?sap-ui-app-id-hint=saas_approuter_zcapexapprover&/Capex({documentID})?layout=TwoColumnsMidExpanded";
+                        dynamicURL = baseURL.replace("{documentID}", currentRecord[0]?.documentID);
+                        const userURL = "https://capex-development-683d45ho.launchpad.cfapps.ca10.hana.ondemand.com/site/Kruger#zcapexcreator-manage?sap-ui-app-id-hint=saas_approuter_zcapexcreator&/Capex({documentID})?layout=TwoColumnsMidExpanded";
                         dyuserURL = userURL.replace("{documentID}", currentRecord[0]?.documentID);
                         if (wf_status === 'Approved') {
                             lowestName = currentRecord[0].to_ApproverHistory[0].approverName;
@@ -565,7 +566,7 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                         if (!lowestName) {
                             lowestName = getFullNameFromEmail(currentRecord[0].currentApprover);
                         }
-                        const userURL = "https://yk2lt6xsylvfx4dz.launchpad.cfapps.us10.hana.ondemand.com/site?siteId=4bf2f916-b150-4361-918c-8a51f5b9c835#zcapexcreator-manage?sap-ui-app-id-hint=saas_approuter_zcapexcreator&/Capex({documentID})?layout=TwoColumnsMidExpanded";
+                        const userURL = "https://capex-development-683d45ho.launchpad.cfapps.ca10.hana.ondemand.com/site/Kruger#zcapexcreator-manage?sap-ui-app-id-hint=saas_approuter_zcapexcreator&/Capex({documentID})?layout=TwoColumnsMidExpanded";
                         dyuserURL = userURL.replace("{documentID}", currentRecord[0]?.documentID);
                         const fullName = getFullNameFromEmail(currentRecord[0].createdBy);
                         let testData = {
@@ -740,7 +741,7 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                         console.error("Error deleting workflow instance:", error);
                     }
 
-                    const userURL = "https://yk2lt6xsylvfx4dz.launchpad.cfapps.us10.hana.ondemand.com/site?siteId=4bf2f916-b150-4361-918c-8a51f5b9c835#zcapexcreator-manage?sap-ui-app-id-hint=saas_approuter_zcapexcreator&/Capex({documentID})?layout=TwoColumnsMidExpanded";
+                    const userURL = "https://capex-development-683d45ho.launchpad.cfapps.ca10.hana.ondemand.com/site/Kruger#zcapexcreator-manage?sap-ui-app-id-hint=saas_approuter_zcapexcreator&/Capex({documentID})?layout=TwoColumnsMidExpanded";
                     dyuserURL = userURL.replace("{documentID}", currentRecord[0]?.documentID);
                     const fullName = getFullNameFromEmail(currentRecord[0].createdBy);
                     let testData = {
@@ -792,8 +793,8 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                 }
                 return currentRecord;
             } catch (error) {
-                return {
-                    response: `Status update failed: ${error.message}`
+                if (!req.errors) {
+                    req.error(404, `Status update failed: ${error.message}`);
                 }
             }
 
