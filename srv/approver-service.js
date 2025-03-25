@@ -434,8 +434,8 @@ class CapexApproverCatalogService extends cds.ApplicationService {
 
         async function approveChange(req, Status, wfComments) {
 
-            let wf_parentId = req.params[0].ID;
-            let wf_status = Status;
+            const wf_parentId = req.params[0].ID;
+            const wf_status = Status;
             try {
                 const currentRecord = await db.run(
                     SELECT.from(Capex)
