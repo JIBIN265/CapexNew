@@ -150,6 +150,7 @@ class CapexApproverCatalogService extends cds.ApplicationService {
             const wf_parentId = req.params[0].ID;
             const wf_childId = req.data.childId;
             const wf_status = req.data.status;
+            let status;
             const wf_comments = req.data.comments;
             try {
 
@@ -209,6 +210,9 @@ class CapexApproverCatalogService extends cds.ApplicationService {
 
                     if (filteredApproverHistory.length === 0) {
                         filteredApproverHistory = currentRecord[0].to_ApproverHistory.filter(history => history.status === 'Skipped');
+                        if (filteredApproverHistory) {
+                            status = 'Skipped';
+                        }
                     }
 
                     if (wf_status === 'Skipped') {
@@ -226,7 +230,10 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                         dynamicURL = baseURL.replace("{documentID}", currentRecord[0]?.documentID);
                         const userURL = "https://capex-development-683d45ho.launchpad.cfapps.ca10.hana.ondemand.com/site/Kruger#zcapexcreator-manage?sap-ui-app-id-hint=saas_approuter_zcapexcreator&/Capex({documentID})?layout=TwoColumnsMidExpanded";
                         dyuserURL = userURL.replace("{documentID}", currentRecord[0]?.documentID);
-                        if (wf_status === 'Approved') {
+                        if (status === 'Skipped') {
+                            lowestName = sortedApprovers[0].approverName;
+                        }
+                        else if (wf_status === 'Approved') {
                             lowestName = currentRecord[0].to_ApproverHistory[0].approverName;
                         } else if (wf_status === 'Skipped') {
                             lowestName = sortedApprovers[0].approverName;
@@ -244,7 +251,6 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                             const newStatus = statusHistory[0].estat;
                             await statusChange(req, wf_parentId, newStatus);
                         }
-
 
                         const updatedApproverHistory1 = await db.run(
                             UPDATE(ApproverHistory)
@@ -436,6 +442,7 @@ class CapexApproverCatalogService extends cds.ApplicationService {
 
             const wf_parentId = req.params[0].ID;
             const wf_status = Status;
+            let status;
             try {
                 const currentRecord = await db.run(
                     SELECT.from(Capex)
@@ -448,9 +455,9 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                         .where({ ID: wf_parentId })
                 );
 
-                if (currentRecord[0].currentApprover !== req.user.id) {
-                    req.error(404, 'You are not the Current Approver');
-                }
+                // if (currentRecord[0].currentApprover !== req.user.id) {
+                //     req.error(404, 'You are not the Current Approver');
+                // }
                 if (req.errors) { req.reject(); }
                 let wf_instanceID;
                 if (wfComments) {
@@ -506,6 +513,9 @@ class CapexApproverCatalogService extends cds.ApplicationService {
 
                     if (filteredApproverHistory.length === 0) {
                         filteredApproverHistory = currentRecord[0].to_ApproverHistory.filter(history => history.status === 'Skipped');
+                        if (filteredApproverHistory) {
+                            status = 'Skipped';
+                        }
                     }
 
                     if (wf_status === 'Skipped') {
@@ -523,7 +533,10 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                         dynamicURL = baseURL.replace("{documentID}", currentRecord[0]?.documentID);
                         const userURL = "https://capex-development-683d45ho.launchpad.cfapps.ca10.hana.ondemand.com/site/Kruger#zcapexcreator-manage?sap-ui-app-id-hint=saas_approuter_zcapexcreator&/Capex({documentID})?layout=TwoColumnsMidExpanded";
                         dyuserURL = userURL.replace("{documentID}", currentRecord[0]?.documentID);
-                        if (wf_status === 'Approved') {
+                        if (status === 'Skipped') {
+                            lowestName = sortedApprovers[0].approverName;
+                        }
+                        else if (wf_status === 'Approved') {
                             lowestName = currentRecord[0].to_ApproverHistory[0].approverName;
                         } else if (wf_status === 'Skipped') {
                             lowestName = sortedApprovers[0].approverName;
@@ -744,6 +757,7 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                     const userURL = "https://capex-development-683d45ho.launchpad.cfapps.ca10.hana.ondemand.com/site/Kruger#zcapexcreator-manage?sap-ui-app-id-hint=saas_approuter_zcapexcreator&/Capex({documentID})?layout=TwoColumnsMidExpanded";
                     dyuserURL = userURL.replace("{documentID}", currentRecord[0]?.documentID);
                     const fullName = getFullNameFromEmail(currentRecord[0].createdBy);
+                    const lowestName = getFullNameFromEmail(req.user.id);
                     let testData = {
                         "definitionId": "ca10.capex-development-683d45ho.zcapexopexworkflow.triggerWorkflow",
                         "context": {
@@ -802,7 +816,7 @@ class CapexApproverCatalogService extends cds.ApplicationService {
 
         function getFullNameFromEmail(email) {
             if (!email || !email.includes('@')) {
-                return null; // Return null for invalid email
+                return email; // Return null for invalid email
             }
 
             // Extract the part before '@'
