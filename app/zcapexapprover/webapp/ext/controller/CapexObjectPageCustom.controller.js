@@ -1,4 +1,4 @@
-sap.ui.define(['sap/ui/core/mvc/ControllerExtension'], function (ControllerExtension) {
+sap.ui.define(['sap/ui/core/mvc/ControllerExtension',"sap/m/MessageToast"], function (ControllerExtension, MessageToast) {
 	'use strict';
 
 	return ControllerExtension.extend('zcapexapprover.ext.controller.CapexObjectPageCustom', {
@@ -57,7 +57,7 @@ sap.ui.define(['sap/ui/core/mvc/ControllerExtension'], function (ControllerExten
 						// 	// Add an event delegate to execute logic after rendering
 						// 	oAttachmentTable.addEventDelegate({
 						// 		onAfterRendering: function () {
-				
+
 						// 			try {
 						// 				const oMessageParameters = {
 						// 					description: "This is a custom message description", // Optional
@@ -113,7 +113,8 @@ sap.ui.define(['sap/ui/core/mvc/ControllerExtension'], function (ControllerExten
 						console.error('You should have no error', error.message);
 
 					}
-				}
+				},
+
 
 
 			},
@@ -129,6 +130,32 @@ sap.ui.define(['sap/ui/core/mvc/ControllerExtension'], function (ControllerExten
 			// }
 
 		},
+
+		customApprove: async function (oEvent, oEvents) {
+			debugger;
+			try {
+
+				let sActionName = "CapexApproverCatalogService.approve";
+				let mParameters = {
+					contexts: oEvent,
+					model: oEvent.oModel,
+					label: 'Confirm',
+					invocationGrouping: true
+				};
+				const oContext = await this.base.editFlow.invokeAction(sActionName, mParameters);
+			} catch (oError) {
+				MessageToast.show("Error in Approval Process: " + oError.message);
+			} finally {
+				debugger;
+				const oExtensionAPI = this.base.getExtensionAPI();
+				const routing = oExtensionAPI.getRouting();
+				routing.navigateToRoute('CapexList');
+				console.log("customApprove");
+			}
+		},
+		customReject: function () {
+			console.log("customReject");
+		}
 
 
 

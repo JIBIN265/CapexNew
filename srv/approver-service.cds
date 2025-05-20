@@ -13,6 +13,8 @@ service CapexApproverCatalogService @(path: 'approver') @(requires: 'authenticat
             @(Common.SideEffects.TargetEntities: ['/CapexApproverCatalogService.EntityContainer/Capex'])
             action approve(in : $self)                                                                           returns Capex;
 
+            action customApprove(Capex : Capex)                                                                           returns Capex;
+
             @(Common.SideEffects.TargetEntities: ['/CapexApproverCatalogService.EntityContainer/Capex'])
             action rejectFinal2(text : String  @Common.Label:'Reason for Rejection?'  @UI.MultiLineText:true  )  returns Capex;
 

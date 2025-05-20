@@ -72,6 +72,10 @@ class CapexApproverCatalogService extends cds.ApplicationService {
             }
         });
 
+        this.before('UPDATE', Capex, async (req) => {
+            debugger;
+        });
+
         this.after('READ', Capex, async (results, req) => {
             return results.map(async result => {
                 if (!result.currentUser) {

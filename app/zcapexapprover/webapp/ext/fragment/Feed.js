@@ -24,6 +24,7 @@ sap.ui.define([
             // Prepare the new comment entry
             var oNewComment = {
                 text: sNewComment,
+                IsActiveEntity: true,
                 // Add other required properties if needed
             };
 
@@ -34,11 +35,6 @@ sap.ui.define([
             // Get the binding context for 'to_Comments'
             var oListBinding = oModel.bindList(sPath, oContext);
 
-            // Prepare the new comment entry
-            var oNewComment = {
-                text: sNewComment,
-                // Add other required properties if needed
-            };
             debugger;
             try {
                 // Create the new entry in the context

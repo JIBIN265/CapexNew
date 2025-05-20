@@ -442,6 +442,24 @@
                         "DataFieldForAction::CapexApproverCatalogService.rejectIncomplete",
                         "DataFieldForAction::CapexApproverCatalogService.rejectFinal2"
                       ]
+                    },
+                    "customApprove": {
+                      "press": ".extension.zcapexapprover.ext.controller.CapexObjectPageCustom.customApprove",
+                      "visible": true,
+                      "enabled": true,
+                      "text": "{i18n>customApprove}"
+                    },
+                    "customReject": {
+                      "press": ".extension.zcapexapprover.ext.controller.CapexObjectPageCustom.customReject",
+                      "visible": true,
+                      "enabled": true,
+                      "text": "{i18n>customReject}"
+                    },
+                    "DataFieldForAction::CapexApproverCatalogService.approve": {
+                      "afterExecution": {
+                        "navigateToInstance": true,
+                        "enableAutoScroll": true
+                      }
                     }
                   }
                 },
