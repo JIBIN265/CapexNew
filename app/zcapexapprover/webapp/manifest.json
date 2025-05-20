@@ -326,12 +326,12 @@
               "views": {
                 "paths": [
                   {
-                    "key": "tableView",
-                    "annotationPath": "com.sap.vocabularies.UI.v1.SelectionPresentationVariant#tableView1"
-                  },
-                  {
                     "key": "tableView1",
                     "annotationPath": "com.sap.vocabularies.UI.v1.SelectionPresentationVariant#tableView"
+                  },
+                  {
+                    "key": "tableView",
+                    "annotationPath": "com.sap.vocabularies.UI.v1.SelectionPresentationVariant#tableView1"
                   }
                 ]
               }

@@ -11,7 +11,7 @@
             <!-- FeedInput for creating new comments -->
             <FeedInput 
                 id="feedInput"
-                enabled="{= ${ui>/editMode} === 'Editable'}"
+                enabled="true"
                 post="handler.onPost"
                 icon="test-resources/sap/m/images/dronning_victoria.jpg"
                 class="sapUiSmallMarginTopBottom"/>

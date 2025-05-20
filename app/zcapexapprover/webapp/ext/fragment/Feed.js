@@ -45,8 +45,8 @@ sap.ui.define([
                 await oListBinding.create(oNewComment);
 
                 // Submit changes
-                await oModel.submitBatch(oModel.getUpdateGroupId());
-
+                var result = await oModel.submitBatch(oModel.getUpdateGroupId());
+                
                 MessageToast.show("Comment added successfully!");
                 oControl.setValue(""); // Clear the input field
 

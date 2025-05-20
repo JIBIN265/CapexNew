@@ -301,6 +301,13 @@ class CapexCreatorCatalogService extends cds.ApplicationService {
         this.after('SAVE', Capex, async (_, req) => {
             console.log(req.data);
 
+            const { attachments } = req.data;
+            if (!attachments || attachments.length === 0) {
+                req.error(400, `Please add an attachment`, `in/attachments`);
+            }
+
+            if (req.errors) { req.reject(); }
+
             let data = JSON.parse(JSON.stringify(req.data));
             // Delete unnecessary fields
             const fieldsToDelete = [
@@ -454,7 +461,7 @@ class CapexCreatorCatalogService extends cds.ApplicationService {
                         "initiatorName": fullName ? String(fullName) : "null",
                         "userUrl": dyuserURL ? String(dyuserURL) : "null",
                         "action": "Create",
-                        "decision": "",
+                        "decision": "Level1",
                         "appComments": ""
 
                     }

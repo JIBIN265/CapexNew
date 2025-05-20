@@ -243,6 +243,7 @@ entity CapexEntity : cuid, managed, CapexMain, DocumentId, messageImport {
 
   @description: 'Comments Composition'
   to_Notes            : Composition of many Notes;
+
 };
 
 aspect Comments : cuid, managed {
@@ -276,13 +277,13 @@ aspect Objectives : cuid, managed {
   impact          : Boolean default false; // ZZOTIMPAC3
 
   @description: 'Amount'
-  amount          : String(50); // ZZOTAMOUN3
+  amount          : Decimal(11, 2) default 0; // ZZOTAMOUN3
 }
 
 aspect CashFlowYear : cuid, managed {
 
   @description: 'Year'
-  year           : String(4); // default 0; // ZZYEAR4
+  year           : String(4) @(assert.format: '^\d{4}$');// default 0; // ZZYEAR4
 
   @description: 'Quarter One'
   cashFlowQOne   : Decimal(11, 2) default 0; // ZZ4CASHFLQ1
@@ -317,10 +318,10 @@ aspect ApproverHistory : cuid, managed {
   level        : String(2);
 
   @description: 'Email'
-  email        : String(35);
+  email        : String(70);
 
   @description: 'Approver Name'
-  approverName : String(35);
+  approverName : String(70);
 
   @description: 'Status'
   status       : String(15);

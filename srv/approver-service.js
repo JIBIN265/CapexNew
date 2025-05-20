@@ -35,6 +35,23 @@ class CapexApproverCatalogService extends cds.ApplicationService {
 
             });
 
+        this.on('getMessages', async (req) => {
+            const { Key } = req.data
+            try {
+
+                const { text } = await db.run(SELECT.one.from(Comments)
+                    .columns(['text']).where({ up__ID: Key }));
+                const messageImport = {
+                    notes: text
+                }
+                return messageImport
+            } catch (error) {
+                // Handle errors gracefully
+                console.error('Error in getErrorCount:', error.message);
+                // throw new Error('Failed to retrieve error count.');
+            }
+        });
+
         this.before('READ', Capex, async (req) => {
             const query = req.query;     // Access the filters (if any)
             const filters = query.SELECT.where;     // Log or process the filters
@@ -455,9 +472,9 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                         .where({ ID: wf_parentId })
                 );
 
-                // if (currentRecord[0].currentApprover !== req.user.id) {
-                //     req.error(404, 'You are not the Current Approver');
-                // }
+                if (currentRecord[0].currentApprover !== req.user.id) {
+                    req.error(404, 'You are not the Current Approver');
+                }
                 if (req.errors) { req.reject(); }
                 let wf_instanceID;
                 if (wfComments) {
