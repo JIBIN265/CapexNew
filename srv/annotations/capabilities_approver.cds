@@ -20,22 +20,9 @@ annotate service.Capex with @(
     /* Capabilities.UpdateRestrictions : {
         Updatable : updatePossible, //UpdateRestrictions are ignored in determining if the edit button is visible or not, but it still affects wheather the fields are editable or not
     }, */
-    UI.DeleteHidden                : {$edmJson: {$If: [
-        {$Eq: [
-            {$Path: 'to_Status/deletePossible'},
-            false
-        ]},
-        true,
-        false
-    ]}},
-    UI.UpdateHidden                : {$edmJson: {$If: [
-        {$Eq: [
-            {$Path: 'to_Status/updatePossible'},
-            false
-        ]},
-        true,
-        false
-    ]}}, //Search-Term: #DynamicCRUD
+    UI.DeleteHidden                : true,
+    UI.CreateHidden                : true,
+    UI.UpdateHidden                : true, //Search-Term: #DynamicCRUD
 
 /* Capabilities.FilterRestrictions : {
     RequiredProperties : [

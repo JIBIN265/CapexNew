@@ -131,7 +131,7 @@ sap.ui.define(['sap/ui/core/mvc/ControllerExtension',"sap/m/MessageToast"], func
 
 		},
 
-		customApprove: async function (oEvent, oEvents) {
+		customApprove: async function (oEvent) {
 			debugger;
 			try {
 
@@ -153,8 +153,50 @@ sap.ui.define(['sap/ui/core/mvc/ControllerExtension',"sap/m/MessageToast"], func
 				console.log("customApprove");
 			}
 		},
-		customReject: function () {
-			console.log("customReject");
+		customReject: async function (oEvent) {
+			debugger;
+			try {
+
+				let sActionName = "CapexApproverCatalogService.rejectFinal2";
+				let mParameters = {
+					contexts: oEvent,
+					model: oEvent.oModel,
+					label: 'Confirm',
+					invocationGrouping: true
+				};
+				const oContext = await this.base.editFlow.invokeAction(sActionName, mParameters);
+			} catch (oError) {
+				MessageToast.show("Error in Rejection Process: " + oError.message);
+			} finally {
+				debugger;
+				const oExtensionAPI = this.base.getExtensionAPI();
+				const routing = oExtensionAPI.getRouting();
+				routing.navigateToRoute('CapexList');
+				console.log("customReject");
+			}
+
+		},
+		customSkip: async function(oEvent) {
+			debugger;
+			try {
+
+				let sActionName = "CapexApproverCatalogService.validate";
+				let mParameters = {
+					contexts: oEvent,
+					model: oEvent.oModel,
+					label: 'Confirm',
+					invocationGrouping: true
+				};
+				const oContext = await this.base.editFlow.invokeAction(sActionName, mParameters);
+			} catch (oError) {
+				MessageToast.show("Error in Skip Process: " + oError.message);
+			} finally {
+				debugger;
+				const oExtensionAPI = this.base.getExtensionAPI();
+				const routing = oExtensionAPI.getRouting();
+				routing.navigateToRoute('CapexList');
+				console.log("customSkip");
+			}
 		}
 
 

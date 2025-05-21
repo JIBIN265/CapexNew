@@ -309,15 +309,14 @@
                     "condensedTableLayout": true
                   },
                   "actions": {
-                    "MenuActions": {
-                      "text": "{i18n>reject}",
-                      "menu": [
-                        "DataFieldForAction::CapexApproverCatalogService.rejectIncomplete",
-                        "DataFieldForAction::CapexApproverCatalogService.rejectFinal2"
-                      ]
-                    },
                     "DataFieldForAction::CapexApproverCatalogService.approve": {
-                      "enableOnSelect": "single"
+                      "visible": false
+                    },
+                    "DataFieldForAction::CapexApproverCatalogService.validate": {
+                      "visible": false
+                    },
+                    "DataFieldForAction::CapexApproverCatalogService.rejectFinal2": {
+                      "visible": false
                     }
                   }
                 }
@@ -436,13 +435,6 @@
               "content": {
                 "header": {
                   "actions": {
-                    "MenuActions": {
-                      "text": "{i18n>reject}",
-                      "menu": [
-                        "DataFieldForAction::CapexApproverCatalogService.rejectIncomplete",
-                        "DataFieldForAction::CapexApproverCatalogService.rejectFinal2"
-                      ]
-                    },
                     "customApprove": {
                       "press": ".extension.zcapexapprover.ext.controller.CapexObjectPageCustom.customApprove",
                       "visible": true,
@@ -456,10 +448,19 @@
                       "text": "{i18n>customReject}"
                     },
                     "DataFieldForAction::CapexApproverCatalogService.approve": {
-                      "afterExecution": {
-                        "navigateToInstance": true,
-                        "enableAutoScroll": true
-                      }
+                      "visible": false
+                    },
+                    "DataFieldForAction::CapexApproverCatalogService.validate": {
+                      "visible": false
+                    },
+                    "DataFieldForAction::CapexApproverCatalogService.rejectFinal2": {
+                      "visible": false
+                    },
+                    "customSkip": {
+                      "press": ".extension.zcapexapprover.ext.controller.CapexObjectPageCustom.customSkip",
+                      "visible": true,
+                      "enabled": true,
+                      "text": "{i18n>skip}"
                     }
                   }
                 },

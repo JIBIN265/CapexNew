@@ -12,6 +12,58 @@ sap.ui.define(['sap/ui/core/mvc/ControllerExtension'], function (ControllerExten
 			onInit: function () {
 				// you can access the Fiori elements extensionAPI via this.base.getExtensionAPI
 				var oModel = this.base.getExtensionAPI().getModel();
+				// var oExtensionAPI = this.base.getExtensionAPI();
+				// var oTable = oExtensionAPI.byId("zcapexcreator::CapexObjectPage--fe::table::attachments::LineItem::Table");
+				// debugger;
+				// oTable.addEventDelegate({
+				// 	onAfterRendering: function () {
+				// 		debugger;
+				// 		 if (!this._bCellClickListenerAttached) {
+				// 			// Define a function to handle the cellClick event and show the dialog box
+				// 			debugger;
+				// 			function handleCellClick(oEvent) {
+				// 				debugger
+				// 				// var oCell = oEvent.getParameter("cellControl");
+				// 				// var oCellDomRef = oEvent.getParameter("cellControl").getDomRef();
+				// 				// var oRowIndex = oEvent.getParameter("rowIndex");
+				// 				// var sColumnId = oEvent.getParameter("columnId");
+				// 				// //var sCol = sap.ui.getCore().byId()
+				// 				// debugger
+				// 				// if (sColumnId !== 'zcapexcreator::CapexObjectPage--fe::table::attachments::LineItem::C::content') {
+				// 				// 	return;
+				// 				// }
+				// 				// var oColumn = sap.ui.getCore().byId(sColumnId);
+				// 				// var sColumnName = oColumn.getLabel().getText(); // Get the column label text
+				// 				// var sCellValue = oCellDomRef.textContent.trim(); // Get the cell text content
+				// 				// oRowIndex = oRowIndex + 1;
+				// 				// // Create and open a dialog box
+				// 				// var oDialog = new sap.m.Dialog({
+				// 				// 	title: sColumnName + " Row: " + oRowIndex,
+				// 				// 	resizable: true,
+				// 				// 	draggable: true,
+				// 				// 	content: new sap.m.Text({
+				// 				// 		text: sCellValue
+				// 				// 	}),
+				// 				// 	beginButton: new sap.m.Button({
+				// 				// 		text: "OK",
+				// 				// 		press: function () {
+				// 				// 			oDialog.close();
+				// 				// 		}
+				// 				// 	})
+				// 				// });
+
+				// 				// oDialog.open();
+				// 			}
+				// 			debugger
+				// 			// Attach the cellClick event listener to the inner table
+				// 			oTable.attachRowPress(handleCellClick);
+				// 			debugger
+				// 			// Set the flag to indicate that the event listener has been attached
+				// 			this._bCellClickListenerAttached = true;
+				// 		}
+
+				// 	}.bind(this)
+				// })
 			},
 
 			routing: {

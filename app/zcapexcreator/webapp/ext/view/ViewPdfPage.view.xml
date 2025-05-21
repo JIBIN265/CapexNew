@@ -13,7 +13,8 @@
         </headerContent>
         <content>
             <FlexBox id="_IDGenFlexBox" direction="Column" renderType="Div" class="sapUiSmallMargin" fitContainer="true">
-                <PDFViewer id="_IDGenPDFViewer" source="{content}" isTrustedSource="true" loaded=".isLoaded" height="700px" width="auto" title="{filename}">
+                <PDFViewer id="_IDGenPDFViewer" source="{content}" isTrustedSource="true" loaded=".isLoaded" error=".isError" 
+                formatError=".isFormatError" sourceValidationFailed=".issourceValidationFailed" modelContextChange=".modelContextChange" height="700px" width="auto" title="{filename}">
                     <layoutData>
                         <FlexItemData id="_IDGenFlexItemData" growFactor="1"/>
                     </layoutData>

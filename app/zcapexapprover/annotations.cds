@@ -1,5 +1,7 @@
 using CapexApproverCatalogService as service from '../../srv/approver-service';
 using from '../../srv/annotations/layouts_Capex_approver';
+using from '../../srv/annotations/capabilities_approver';
+
 annotate service.Capex with @(
     UI.LineItem : {
         $value : [
@@ -106,5 +108,5 @@ annotate service.Capex with @(
             Label : '{i18n>RejectOrder}',
         },
     ],
-);
+    );
 
