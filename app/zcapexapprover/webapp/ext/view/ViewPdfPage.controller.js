@@ -71,10 +71,10 @@ sap.ui.define(
 
             },
 
-            isLoaded: async function  (oEvent) {
-                debugger;
-                await oEvent.getSource().getBindingContext().setProperty("note","test")
-            }
+            // isLoaded: async function  (oEvent) {
+            //     debugger;
+            //     await oEvent.getSource().getBindingContext().setProperty("note","test")
+            // }
 
         });
     }

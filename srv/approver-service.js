@@ -35,23 +35,6 @@ class CapexApproverCatalogService extends cds.ApplicationService {
 
             });
 
-        this.on('getMessages', async (req) => {
-            const { Key } = req.data
-            try {
-
-                const { text } = await db.run(SELECT.one.from(Comments)
-                    .columns(['text']).where({ up__ID: Key }));
-                const messageImport = {
-                    notes: text
-                }
-                return messageImport
-            } catch (error) {
-                // Handle errors gracefully
-                console.error('Error in getErrorCount:', error.message);
-                // throw new Error('Failed to retrieve error count.');
-            }
-        });
-
         this.before('READ', Capex, async (req) => {
             const query = req.query;     // Access the filters (if any)
             const filters = query.SELECT.where;     // Log or process the filters
@@ -72,9 +55,6 @@ class CapexApproverCatalogService extends cds.ApplicationService {
             }
         });
 
-        this.before('UPDATE', Capex, async (req) => {
-            debugger;
-        });
 
         this.after('READ', Capex, async (results, req) => {
             return results.map(async result => {

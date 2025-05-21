@@ -191,6 +191,11 @@ class CapexCreatorCatalogService extends cds.ApplicationService {
                 cashFlowQFour
             } = req.data;
 
+            const currentYear = new Date().getFullYear();
+            if (!/^\d{4}$/.test(year) || year < 1900 || year > currentYear + 90) {
+                req.warn(404, `Invalid year. Please enter a 4-digit valid year`);
+            }
+
             // Initialize total to 0
             let total = 0;
             const record = await db.run(SELECT.one.from(CashFlowYear.drafts).where({ ID: ID }));
