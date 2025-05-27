@@ -192,8 +192,10 @@ class CapexCreatorCatalogService extends cds.ApplicationService {
             } = req.data;
 
             const currentYear = new Date().getFullYear();
-            if (!/^\d{4}$/.test(year) || year < 1900 || year > currentYear + 90) {
-                req.warn(404, `Invalid year. Please enter a 4-digit valid year`);
+            if (year) {
+                if (!/^\d{4}$/.test(year) || year < 1900 || year > currentYear + 90) {
+                    req.warn(404, `Invalid year. Please enter a 4-digit valid year.`);
+                }
             }
 
             // Initialize total to 0

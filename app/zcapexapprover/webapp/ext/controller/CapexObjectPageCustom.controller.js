@@ -143,14 +143,16 @@ sap.ui.define(['sap/ui/core/mvc/ControllerExtension',"sap/m/MessageToast"], func
 					invocationGrouping: true
 				};
 				const oContext = await this.base.editFlow.invokeAction(sActionName, mParameters);
-			} catch (oError) {
-				MessageToast.show("Error in Approval Process: " + oError.message);
-			} finally {
+
 				debugger;
 				const oExtensionAPI = this.base.getExtensionAPI();
 				const routing = oExtensionAPI.getRouting();
 				routing.navigateToRoute('CapexList');
 				console.log("customApprove");
+			} catch (oError) {
+				if (oError.message !== "Dialog cancelled") {
+					console.log("Error in Approval Process: " + oError.message);
+				}
 			}
 		},
 		customReject: async function (oEvent) {
@@ -165,16 +167,15 @@ sap.ui.define(['sap/ui/core/mvc/ControllerExtension',"sap/m/MessageToast"], func
 					invocationGrouping: true
 				};
 				const oContext = await this.base.editFlow.invokeAction(sActionName, mParameters);
-			} catch (oError) {
-				MessageToast.show("Error in Rejection Process: " + oError.message);
-			} finally {
+
 				debugger;
 				const oExtensionAPI = this.base.getExtensionAPI();
 				const routing = oExtensionAPI.getRouting();
 				routing.navigateToRoute('CapexList');
 				console.log("customReject");
-			}
-
+			} catch (oError) {
+				console.log("Error in Rejection Process: " + oError.message);
+			} 
 		},
 		customSkip: async function(oEvent) {
 			debugger;
@@ -188,17 +189,16 @@ sap.ui.define(['sap/ui/core/mvc/ControllerExtension',"sap/m/MessageToast"], func
 					invocationGrouping: true
 				};
 				const oContext = await this.base.editFlow.invokeAction(sActionName, mParameters);
-			} catch (oError) {
-				MessageToast.show("Error in Skip Process: " + oError.message);
-			} finally {
+
 				debugger;
 				const oExtensionAPI = this.base.getExtensionAPI();
 				const routing = oExtensionAPI.getRouting();
 				routing.navigateToRoute('CapexList');
 				console.log("customSkip");
+			} catch (oError) {
+				console.log("Error in Skip Process: " + oError.message);
 			}
 		}
-
 
 
 	});
