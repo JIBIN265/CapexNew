@@ -1,6 +1,13 @@
 {
   "routes": [
     {
+      "source": "/(.*)$",
+      "target": "$1",
+      "destination": "zcapex-srv",
+      "csrfProtection": false,
+      "authenticationType": "xsuaa"
+    },
+    {
       "source": "^/app/(.*)$",
       "target": "$1",
       "localDir": ".",

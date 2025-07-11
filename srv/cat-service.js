@@ -434,13 +434,13 @@ class CapexCatalogService extends cds.ApplicationService {
                 const lowestLevelEmail = 'jibin.thomas@msitek.us';//sortedApprovers[0]?.Email;
                 const lowestLevelID = currentAppHis[0].ID;
                 const lowestFolderID = req.data.attachments[0]?.folderId;
-                const baseURL = "https://capex-development-683d45ho.launchpad.cfapps.ca10.hana.ondemand.com/site/Kruger#zcapexapprover-manage?sap-ui-app-id-hint=saas_approuter_zcapexapprover&/Capex({documentID})?layout=TwoColumnsMidExpanded";
+                const baseURL = "https://kruger-quality-2l7x5qfv.launchpad.cfapps.ca10.hana.ondemand.com/site/Kruger#zcapexapprover-manage?sap-ui-app-id-hint=saas_approuter_zcapexapprover&/Capex({documentID})?layout=TwoColumnsMidExpanded";
                 const dynamicURL = baseURL.replace("{documentID}", req.data.documentID);
                 const lowestName = currentAppHis[0].approverName;
 
 
                 let testData = {
-                    "definitionId": "ca10.capex-development-683d45ho.zcapexopexworkflow.triggerWorkflow",
+                     "definitionId": "ca10.kruger-quality-2l7x5qfv.zcapexopexworkflowdev.triggerWorkflow",
                     "context": {
                         "orderNumber": req.data.orderNumber ? String(req.data.orderNumber) : "null",
                         "orderType": req.data.orderType ? String(req.data.orderType) : "null",
@@ -731,7 +731,7 @@ class CapexCatalogService extends cds.ApplicationService {
                     }
 
                     let testData = {
-                        "definitionId": "ca10.capex-development-683d45ho.zcapexopexworkflow.triggerWorkflow",
+                         "definitionId": "ca10.kruger-quality-2l7x5qfv.zcapexopexworkflowdev.triggerWorkflow",
                         "context": {
                             "orderNumber": currentRecord[0].orderNumber ? String(currentRecord[0].orderNumber) : "null",
                             "orderType": currentRecord[0].orderType ? String(currentRecord[0].orderType) : "null",
@@ -960,7 +960,7 @@ class CapexCatalogService extends cds.ApplicationService {
                     }
 
                     let testData = {
-                        "definitionId": "ca10.capex-development-683d45ho.zcapexopexworkflow.triggerWorkflow",
+                         "definitionId": "ca10.kruger-quality-2l7x5qfv.zcapexopexworkflowdev.triggerWorkflow",
                         "context": {
                             "orderNumber": currentRecord[0].orderNumber ? String(currentRecord[0].orderNumber) : "null",
                             "orderType": currentRecord[0].orderType ? String(currentRecord[0].orderType) : "null",

@@ -227,9 +227,9 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                         lowestLevelEmail = sortedApprovers[0]?.email;
                         lowestLevelID = sortedApprovers[0]?.ID;
                         lowestFolderID = currentRecord[0]?.attachments?.[0]?.folderId || null;
-                        const baseURL = "https://capex-development-683d45ho.launchpad.cfapps.ca10.hana.ondemand.com/site/Kruger#zcapexapprover-manage?sap-ui-app-id-hint=saas_approuter_zcapexapprover&/Capex({documentID})?layout=TwoColumnsMidExpanded";
+                        const baseURL = "https://kruger-quality-2l7x5qfv.launchpad.cfapps.ca10.hana.ondemand.com/site/Kruger#zcapexapprover-manage?sap-ui-app-id-hint=saas_approuter_zcapexapprover&/Capex({documentID})?layout=TwoColumnsMidExpanded";
                         dynamicURL = baseURL.replace("{documentID}", currentRecord[0]?.documentID);
-                        const userURL = "https://capex-development-683d45ho.launchpad.cfapps.ca10.hana.ondemand.com/site/Kruger#zcapexcreator-manage?sap-ui-app-id-hint=saas_approuter_zcapexcreator&/Capex({documentID})?layout=TwoColumnsMidExpanded";
+                        const userURL = "https://kruger-quality-2l7x5qfv.launchpad.cfapps.ca10.hana.ondemand.com/site/Kruger#zcapexcreator-manage?sap-ui-app-id-hint=saas_approuter_zcapexcreator&/Capex({documentID})?layout=TwoColumnsMidExpanded";
                         dyuserURL = userURL.replace("{documentID}", currentRecord[0]?.documentID);
                         if (status === 'Skipped') {
                             lowestName = sortedApprovers[0].approverName;
@@ -283,7 +283,7 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                     }
                     const fullName = getFullNameFromEmail(currentRecord[0].createdBy);
                     let testData = {
-                        "definitionId": "ca10.capex-development-683d45ho.zcapexopexworkflow.triggerWorkflow",
+                         "definitionId": "ca10.kruger-quality-2l7x5qfv.zcapexopexworkflowdev.triggerWorkflow",
                         "context": {
                             "orderNumber": currentRecord[0].orderNumber ? String(currentRecord[0].orderNumber) : "null",
                             "orderType": currentRecord[0].orderType ? String(currentRecord[0].orderType) : "null",
@@ -530,9 +530,9 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                         lowestLevelEmail = sortedApprovers[0]?.email
                         lowestLevelID = sortedApprovers[0]?.ID;
                         lowestFolderID = currentRecord[0]?.attachments?.[0]?.folderId || null;
-                        const baseURL = "https://capex-development-683d45ho.launchpad.cfapps.ca10.hana.ondemand.com/site/Kruger#zcapexapprover-manage?sap-ui-app-id-hint=saas_approuter_zcapexapprover&/Capex({documentID})?layout=TwoColumnsMidExpanded";
+                        const baseURL = "https://kruger-quality-2l7x5qfv.launchpad.cfapps.ca10.hana.ondemand.com/site/Kruger#zcapexapprover-manage?sap-ui-app-id-hint=saas_approuter_zcapexapprover&/Capex({documentID})?layout=TwoColumnsMidExpanded";
                         dynamicURL = baseURL.replace("{documentID}", currentRecord[0]?.documentID);
-                        const userURL = "https://capex-development-683d45ho.launchpad.cfapps.ca10.hana.ondemand.com/site/Kruger#zcapexcreator-manage?sap-ui-app-id-hint=saas_approuter_zcapexcreator&/Capex({documentID})?layout=TwoColumnsMidExpanded";
+                        const userURL = "https://kruger-quality-2l7x5qfv.launchpad.cfapps.ca10.hana.ondemand.com/site/Kruger#zcapexcreator-manage?sap-ui-app-id-hint=saas_approuter_zcapexcreator&/Capex({documentID})?layout=TwoColumnsMidExpanded";
                         dyuserURL = userURL.replace("{documentID}", currentRecord[0]?.documentID);
                         if (status === 'Skipped') {
                             lowestName = sortedApprovers[0].approverName;
@@ -580,11 +580,11 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                         if (!lowestName) {
                             lowestName = getFullNameFromEmail(currentRecord[0].currentApprover);
                         }
-                        const userURL = "https://capex-development-683d45ho.launchpad.cfapps.ca10.hana.ondemand.com/site/Kruger#zcapexcreator-manage?sap-ui-app-id-hint=saas_approuter_zcapexcreator&/Capex({documentID})?layout=TwoColumnsMidExpanded";
+                        const userURL = "https://kruger-quality-2l7x5qfv.launchpad.cfapps.ca10.hana.ondemand.com/site/Kruger#zcapexcreator-manage?sap-ui-app-id-hint=saas_approuter_zcapexcreator&/Capex({documentID})?layout=TwoColumnsMidExpanded";
                         dyuserURL = userURL.replace("{documentID}", currentRecord[0]?.documentID);
                         const fullName = getFullNameFromEmail(currentRecord[0].createdBy);
                         let testData = {
-                            "definitionId": "ca10.capex-development-683d45ho.zcapexopexworkflow.triggerWorkflow",
+                             "definitionId": "ca10.kruger-quality-2l7x5qfv.zcapexopexworkflowdev.triggerWorkflow",
                             "context": {
                                 "orderNumber": currentRecord[0].orderNumber ? String(currentRecord[0].orderNumber) : "null",
                                 "orderType": currentRecord[0].orderType ? String(currentRecord[0].orderType) : "null",
@@ -647,7 +647,7 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                     }
                     const fullName = getFullNameFromEmail(currentRecord[0].createdBy);
                     let testData = {
-                        "definitionId": "ca10.capex-development-683d45ho.zcapexopexworkflow.triggerWorkflow",
+                         "definitionId": "ca10.kruger-quality-2l7x5qfv.zcapexopexworkflowdev.triggerWorkflow",
                         "context": {
                             "orderNumber": currentRecord[0].orderNumber ? String(currentRecord[0].orderNumber) : "null",
                             "orderType": currentRecord[0].orderType ? String(currentRecord[0].orderType) : "null",
@@ -755,12 +755,12 @@ class CapexApproverCatalogService extends cds.ApplicationService {
                         console.error("Error deleting workflow instance:", error);
                     }
 
-                    const userURL = "https://capex-development-683d45ho.launchpad.cfapps.ca10.hana.ondemand.com/site/Kruger#zcapexcreator-manage?sap-ui-app-id-hint=saas_approuter_zcapexcreator&/Capex({documentID})?layout=TwoColumnsMidExpanded";
+                    const userURL = "https://kruger-quality-2l7x5qfv.launchpad.cfapps.ca10.hana.ondemand.com/site/Kruger#zcapexcreator-manage?sap-ui-app-id-hint=saas_approuter_zcapexcreator&/Capex({documentID})?layout=TwoColumnsMidExpanded";
                     dyuserURL = userURL.replace("{documentID}", currentRecord[0]?.documentID);
                     const fullName = getFullNameFromEmail(currentRecord[0].createdBy);
                     const lowestName = getFullNameFromEmail(req.user.id);
                     let testData = {
-                        "definitionId": "ca10.capex-development-683d45ho.zcapexopexworkflow.triggerWorkflow",
+                         "definitionId": "ca10.kruger-quality-2l7x5qfv.zcapexopexworkflowdev.triggerWorkflow",
                         "context": {
                             "orderNumber": currentRecord[0].orderNumber ? String(currentRecord[0].orderNumber) : "null",
                             "orderType": currentRecord[0].orderType ? String(currentRecord[0].orderType) : "null",

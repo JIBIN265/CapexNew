@@ -6,7 +6,7 @@
     {
       "name": "uaa.user",
       "description": "UAA"
-     },
+    },
     {
       "name": "$XSAPPNAME.ZCapexApprover",
       "description": "Approver Kruger Capital Expenditure Approval Process"
@@ -20,15 +20,16 @@
       "description": "Administrator Kruger Capital Expenditure Approval Process"
     }
   ],
-  "attributes": [],
+  "attributes": [
+  ],
   "role-templates": [
     {
       "name": "Token_Exchange",
       "description": "UAA",
       "scope-references": [
-       "uaa.user"
+        "uaa.user"
       ]
-     },
+    },
     {
       "name": "ZCapexApprover",
       "description": "Approver Kruger Capital Expenditure Approval Process",
@@ -56,10 +57,11 @@
   ],
   "oauth2-configuration": {
     "redirect-uris": [
-      "https://*cfapps.us10-001.hana.ondemand.com/login/callback/**",
+      "https://*cfapps.ca10.hana.ondemand.com/login/callback/**",
       "http://localhost:5000/login/callback/**",
       "http://*.localhost:4004/**",
-      "https://*.applicationstudio.cloud.sap/**"
+      "https://*.applicationstudio.cloud.sap/**",
+      "http://localhost:5000/"
     ]
   },
   "authorities-inheritance": false

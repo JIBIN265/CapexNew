@@ -308,10 +308,10 @@ class CapexCreatorCatalogService extends cds.ApplicationService {
         this.after('SAVE', Capex, async (_, req) => {
             console.log(req.data);
 
-            const { attachments } = req.data;
-            if (!attachments || attachments.length === 0) {
-                req.error(400, `Please add an attachment`, `in/attachments`);
-            }
+            // const { attachments } = req.data;
+            // if (!attachments || attachments.length === 0) {
+            //     req.error(400, `Please add an attachment`, `in/attachments`);
+            // }
 
             if (req.errors) { req.reject(); }
 
@@ -426,15 +426,15 @@ class CapexCreatorCatalogService extends cds.ApplicationService {
                 const lowestLevelEmail = currentApprover;
                 const lowestLevelID = currentAppHis[0].ID;
                 const lowestFolderID = req.data.attachments[0]?.folderId;
-                const baseURL = "https://capex-development-683d45ho.launchpad.cfapps.ca10.hana.ondemand.com/site/Kruger#zcapexapprover-manage?sap-ui-app-id-hint=saas_approuter_zcapexapprover&/Capex({documentID})?layout=TwoColumnsMidExpanded";
+                const baseURL = "https://kruger-quality-2l7x5qfv.launchpad.cfapps.ca10.hana.ondemand.com/site/Kruger#zcapexapprover-manage?sap-ui-app-id-hint=saas_approuter_zcapexapprover&/Capex({documentID})?layout=TwoColumnsMidExpanded";
                 const dynamicURL = baseURL.replace("{documentID}", req.data.documentID);
-                const userURL = "https://capex-development-683d45ho.launchpad.cfapps.ca10.hana.ondemand.com/site/Kruger#zcapexcreator-manage?sap-ui-app-id-hint=saas_approuter_zcapexcreator&/Capex({documentID})?layout=TwoColumnsMidExpanded";
+                const userURL = "https://kruger-quality-2l7x5qfv.launchpad.cfapps.ca10.hana.ondemand.com/site/Kruger#zcapexcreator-manage?sap-ui-app-id-hint=saas_approuter_zcapexcreator&/Capex({documentID})?layout=TwoColumnsMidExpanded";
                 const dyuserURL = userURL.replace("{documentID}", req.data.documentID);
                 const lowestName = currentAppHis[0].approverName;
                 const fullName = getFullNameFromEmail(req.user.id);
 
                 let testData = {
-                    "definitionId": "ca10.capex-development-683d45ho.zcapexopexworkflow.triggerWorkflow",
+                     "definitionId": "ca10.kruger-quality-2l7x5qfv.zcapexopexworkflowdev.triggerWorkflow",
                     "context": {
                         "orderNumber": crOrderNumber ? String(crOrderNumber) : "null",
                         "orderType": req.data.orderType ? String(req.data.orderType) : "null",
